@@ -1,37 +1,59 @@
-# Navigation Example
+# DormX - Your Dorm Life Companion
 
-<p>
-  <!-- iOS -->
-  <a href="https://itunes.apple.com/app/apple-store/id982107779">
-    <img alt="Supports Expo iOS" longdesc="Supports Expo iOS" src="https://img.shields.io/badge/iOS-4630EB.svg?style=flat-square&logo=APPLE&labelColor=999999&logoColor=fff" />
-  </a>
-  <!-- Android -->
-  <a href="https://play.google.com/store/apps/details?id=host.exp.exponent&referrer=blankexample">
-    <img alt="Supports Expo Android" longdesc="Supports Expo Android" src="https://img.shields.io/badge/Android-4630EB.svg?style=flat-square&logo=ANDROID&labelColor=A4C639&logoColor=fff" />
-  </a>
-  <!-- Web -->
-  <a href="https://docs.expo.dev/workflow/web/">
-    <img alt="Supports Expo Web" longdesc="Supports Expo Web" src="https://img.shields.io/badge/web-4630EB.svg?style=flat-square&logo=GOOGLE-CHROME&labelColor=4285F4&logoColor=fff" />
-  </a>
-</p>
+DormX is a comprehensive React Native mobile app designed to enhance and simplify dorm life for college students. The app provides a centralized platform for various aspects of dormitory living, including communication, event planning, resource sharing, and more.
 
-## 🚀 How to use
+## Features
 
-- Install packages with `yarn` or `npm install`.
-- Run `yarn start` or `npm run start` to start the bundler.
-- Open the project in a React runtime to try it:
-  - iOS: [Client iOS](https://itunes.apple.com/app/apple-store/id982107779)
-  - Android: [Client Android](https://play.google.com/store/apps/details?id=host.exp.exponent&referrer=blankexample)
-  - Web: Any web browser
-- When it's time to customize your runtime, refer to the ["Adding custom native code"](https://docs.expo.dev/workflow/customizing/) guide!
+- **Home Dashboard**: Quick access to all major app features
+- **Chat System**: Connect with roommates and dorm neighbors
+- **Photo Gallery**: Share and browse dorm community photos
+- **Calendar**: Track dorm events, classes, and personal schedules
+- **Dorm Classes**: Information about classes and study groups in your dorm
+- **Marketplace**: Buy, sell, or exchange items within your dorm community
+- **Resources**: Access to important dorm and campus resources
 
-## Publishing
+## Technology Stack
 
-- Deploy the native app to the App store and Play store using this guide: [Deployment](https://docs.expo.dev/distribution/app-stores/).
-- Deploy the website using this guide: [Web deployment](https://docs.expo.dev/distribution/publishing-websites/).
+- **React Native**: Cross-platform mobile development
+- **Expo**: Simplified React Native development and deployment
+- **React Navigation**: Tab and stack navigation throughout the app
 
-## 📝 Notes
+## Color Palette
 
-- Learn more about [Universal React](https://docs.expo.dev/).
-- See what API and components are [available in the React runtimes](https://docs.expo.dev/versions/latest/).
-- Find out more about developing apps and websites: [Official guides](https://docs.expo.dev/guides/).
+DormX uses a modern, vibrant color palette that resonates with student life:
+
+- **Primary Blue (#5E72E4)**: Main brand color, energetic and trustworthy
+- **Gray Blue (#8898AA)**: Secondary color for less prominent UI elements
+- **Success Green (#2DCE89)**: Confirmations and positive actions
+- **Info Cyan (#11CDEF)**: Informational elements and highlights
+- **Warning Orange (#FB6340)**: Cautionary elements
+- **Danger Red (#F5365C)**: Errors and critical actions
+- **Light Background (#F7FAFC)**: Clean, minimal backgrounds
+- **Dark Text (#172B4D)**: Clear, readable text
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Start the development server: `npm start`
+4. Run on iOS: `npm run ios` or Android: `npm run android`
+
+## Project Structure
+
+- `/assets`: Images and other static assets
+- `/components`: Reusable UI components
+- `/constants`: App constants including colors and theme information
+- `/hooks`: Custom React hooks
+- `/navigation`: Navigation configuration
+- `/screens`: Main app screens
+
+## Development Roadmap
+
+- [x] Basic navigation setup
+- [x] Home screen layout
+- [ ] User authentication and profiles
+- [ ] Chat functionality
+- [ ] Calendar integration
+- [ ] Marketplace listings
+- [ ] Photo gallery implementation
+- [ ] Resource library
