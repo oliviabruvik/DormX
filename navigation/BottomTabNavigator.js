@@ -6,6 +6,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors from "../constants/Colors";
 import HomeScreen from "../screens/HomeScreen";
+import ChatsScreen from "../screens/ChatsScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 
@@ -43,7 +44,7 @@ export default function BottomTabNavigator() {
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="ios-home" color={color} />
+            <TabBarIcon name="home" color={color} />
           ),
         }}
       />
@@ -53,7 +54,7 @@ export default function BottomTabNavigator() {
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="ios-search" color={color} />
+            <TabBarIcon name="search" color={color} />
           ),
         }}
       />
@@ -63,7 +64,7 @@ export default function BottomTabNavigator() {
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="ios-person" color={color} />
+            <TabBarIcon name="person" color={color} />
           ),
         }}
       />
@@ -73,7 +74,7 @@ export default function BottomTabNavigator() {
         options={{
           headerShown: false,
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="ios-settings" color={color} />
+            <TabBarIcon name="settings" color={color} />
           ),
         }}
       />
@@ -105,6 +106,11 @@ function HomeNavigator() {
         name="HomeScreen"
         component={HomeScreen}
         options={{ headerShown: false }}
+      />
+      <HomeStack.Screen
+        name="ChatsScreen" 
+        component={ChatsScreen}
+        options={{ headerTitle: "Chats" }}
       />
     </HomeStack.Navigator>
   );

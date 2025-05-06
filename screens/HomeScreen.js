@@ -287,9 +287,21 @@ export default function HomeScreen({ navigation }) {
         key={feature.id}
         title={feature.title}
         AnimatedIcon={feature.AnimatedIcon}
-        onPress={() => console.log(`Pressed ${feature.title}`)}
+        onPress={() => {
+          console.log(`Pressed ${feature.title}`);
+          if (feature.title === "Chats") {
+            navigation.navigate('ChatsScreen')
+          }
+        }
+      }
       />
     ));
+  };
+
+  // Chat press handler
+  const handleChatPress = () => {
+    console.log('Pressed Chats');
+    navigation.navigate('ChatsScreen');
   };
 
   return (
@@ -361,5 +373,18 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: "center",
     justifyContent: "center",
+  },
+  button: {
+    backgroundColor: '#2196F3',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginVertical: 10,
+    minWidth: 150,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
