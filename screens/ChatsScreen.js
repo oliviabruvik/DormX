@@ -110,10 +110,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: 'white',
+    flexShrink: 1,
   },
   chatTime: {
     fontSize: 12,
     color: '#888',
+    padding_right: 10,
   },
   chatMessage: {
     fontSize: 14,
