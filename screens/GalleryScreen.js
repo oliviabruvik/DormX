@@ -22,7 +22,9 @@ export default function GalleryScreen() {
         { id: 1, title: "Event 1", source: require('../assets/images/example_image.jpeg')},
         { id: 2, title: "Event 2", source: require('../assets/images/example_image.jpeg')},
         { id: 3, title: "Event 3"},
-         { id: 4, title: "Event 4", source: require('../assets/images/example_image.jpeg')},
+        { id: 4, title: "Event 4", source: require('../assets/images/example_image.jpeg')},
+        { id: 5, title: "Event 5", source: require('../assets/images/example_image.jpeg')},
+        { id: 6, title: "Event 6"},
       ];
 
       // Calculate layout dimensions based on screen width
