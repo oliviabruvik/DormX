@@ -292,6 +292,9 @@ export default function HomeScreen({ navigation }) {
           if (feature.title === "Chats") {
             navigation.navigate('ChatsScreen')
           }
+          if (feature.title === "Gallery") {
+            navigation.navigate('GalleryScreen')
+          }
         }
       }
       />
@@ -302,6 +305,12 @@ export default function HomeScreen({ navigation }) {
   const handleChatPress = () => {
     console.log('Pressed Chats');
     navigation.navigate('ChatsScreen');
+  };
+
+  // Chat press handler
+  const handleGalleryPress = () => {
+    console.log('Pressed Gallery');
+    navigation.navigate('GalleryScreen');
   };
 
   return (
