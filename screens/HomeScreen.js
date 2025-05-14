@@ -290,7 +290,7 @@ export default function HomeScreen({ navigation }) {
         onPress={() => {
           console.log(`Pressed ${feature.title}`);
           if (feature.title === "Chats") {
-            navigation.navigate('ChatsScreen')
+            navigation.navigate('ChannelsScreen')
           }
           if (feature.title === "Gallery") {
             navigation.navigate('GalleryScreen')
@@ -304,7 +304,7 @@ export default function HomeScreen({ navigation }) {
   // Chat press handler
   const handleChatPress = () => {
     console.log('Pressed Chats');
-    navigation.navigate('ChatsScreen');
+    navigation.navigate('ChannelsScreen');
   };
 
   // Chat press handler

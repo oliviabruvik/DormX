@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../constants/Colors";
 import HomeScreen from "../screens/HomeScreen";
 import ChatsScreen from "../screens/ChatsScreen";
+import ChannelsScreen from "../screens/ChannelsScreen";
 import GalleryScreen from "../screens/GalleryScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
@@ -109,9 +110,16 @@ function HomeNavigator() {
         options={{ headerShown: false, headerTitle: "Home"}}
       />
       <HomeStack.Screen
+        name="ChannelsScreen" 
+        component={ChannelsScreen}
+        options={{ headerTitle: "Channels" }}
+      />
+      <HomeStack.Screen
         name="ChatsScreen" 
         component={ChatsScreen}
-        options={{ headerTitle: "Chats" }}
+        options={({ route }) => ({ 
+          headerTitle: route.params?.channelName || "Chats" 
+        })}
       />
       <HomeStack.Screen
         name="GalleryScreen" 

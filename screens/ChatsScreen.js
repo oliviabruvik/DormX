@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, useColorScheme } from 'react-native';
 import Colors from '../constants/Colors';
 
-export default function ChatsScreen() {
+export default function ChatsScreen({ navigation, route}) {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
+
+  const { channelName = 'General' } = route.params || {};
   
   // Sample chat data (you would replace this with real data)
   const chats = [
@@ -18,7 +20,7 @@ export default function ChatsScreen() {
   ];
 
   return (
-    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>      
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>   
       <ScrollView style={styles.chatList}>
         {chats.map(chat => (
           <View 
@@ -41,7 +43,7 @@ export default function ChatsScreen() {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                {chat.lastMessage}
+                {chat.lastMessage || "No messages yet"}
               </Text>
             </View>
           </View>
@@ -54,16 +56,6 @@ export default function ChatsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  header: {
-    padding: 20,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
   },
   chatList: {
     flex: 1,
