@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "my-app-nav",
+    "name": "My App",
     "slug": "my-app-nav",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
+    "owner": "reneedw",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -19,13 +20,19 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "supportsMultipleScreens": true,
+      "scheme": "myapp",
+      "bundleIdentifier": "com.reneedw.myapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.reneedw.myapp",
+      "supportsMultipleScreens": true,
+      "permissions": ["INTERNET"]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -34,6 +41,11 @@
       "expo-font",
       "expo-asset",
       "expo-web-browser"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "b88df7bc-2589-413b-8b2c-f3eab6ac6d41"
+      }
+    }
   }
 }
