@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "792953911828",
+    "project_id": "dormx-a1ea9",
+    "storage_bucket": "dormx-a1ea9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:792953911828:android:c9cafd7b64602940d74501",
+        "android_client_info": {
+          "package_name": "com.reneedw.myapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "792953911828-3s1nc97d3ucn2qs6valkef7mgdi6inne.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.reneedw.myapp",
+            "certificate_hash": "dfc83f29b24ca5e7849a98a242c618599e006a2e"
+          }
+        },
+        {
+          "client_id": "792953911828-6ums3ajc904ue2ogq9ahg1m2uadjmcuf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAl-GimDira3g38hXPK_xKZX0E5WDgclE8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "792953911828-6ums3ajc904ue2ogq9ahg1m2uadjmcuf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,75 +1,52 @@
-// WebAuth.js - Alternative solution for Android
+// WebAuth.js - Fixed export
 import React, { useState, useEffect } from 'react';
 import * as WebBrowser from 'expo-web-browser';
 import * as Google from 'expo-auth-session/providers/google';
-import { makeRedirectUri } from 'expo-auth-session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform, Alert } from 'react-native';
 
 // Register the redirect handler
 WebBrowser.maybeCompleteAuthSession();
 
-export function useGoogleAuth() {
+// Fixed export - this should match what Auth.js expects
+export function useWebGoogleAuth() {
   const [userInfo, setUserInfo] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // Configure platform-specific redirect URI
-  let redirectUri;
-  if (Platform.OS === 'web') {
-    // For web, don't use proxy
-    redirectUri = makeRedirectUri({
-      useProxy: false
-    });
-  } else if (Platform.OS === 'android') {
-    // For Android/iOS, use the auth proxy
-    redirectUri = makeRedirectUri({
-      useProxy: true
-    });
-  }
+  console.log('Using Web Google Auth mechanism');
   
-  console.log('Platform:', Platform.OS);
-  console.log('Redirect URI:', redirectUri);
+  // Web client ID only needed for web platform
+  const webClientId = '12343180424-rd5r15ump73l9k64k64i492v9f861jh9.apps.googleusercontent.com';
   
-  // Configure Google Auth differently for web vs. native
-  const [request, response, promptAsync] = Google.useAuthRequest(
-    {
-      expoClientId: '12343180424-rd5r15ump73l9k64k64i492v9f861jh9.apps.googleusercontent.com',
-      androidClientId: '12343180424-ju2p322l4rpf5a546ihscc3obomhts5h.apps.googleusercontent.com',
-      webClientId: '12343180424-rd5r15ump73l9k64k64i492v9f861jh9.apps.googleusercontent.com',
-      redirectUri,
-      scopes: ['profile', 'email'],
-    },
-    { 
-      // Platform-specific proxy settings
-      useProxy: Platform.OS !== 'web',
-      // Select account only on web
-      selectAccount: Platform.OS === 'web',
-    }
-  );
-
+  // Use the web approach
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: webClientId,
+    expoClientId: webClientId,
+    // No need for other client IDs as this is web only
+    responseType: "token",
+    scopes: ['profile', 'email'],
+  });
+  
   useEffect(() => {
-    // Check for stored user data
     checkLocalUserInfo();
   }, []);
 
   useEffect(() => {
     console.log('OAuth response:', response ? JSON.stringify(response, null, 2) : null);
+    
     if (response?.type === 'success') {
       handleSignInResponse(response);
     } else if (response?.type === 'error') {
       console.error('Auth Error Details:', response.error);
-      
-      // Show different alerts based on platform
-      if (Platform.OS === 'web') {
-        console.error('Authentication error:', response.error);
-      } else {
-        Alert.alert(
-          "Authentication Error", 
-          `Error: ${response.error?.description || response.error?.message || "Unknown error"}`,
-          [{ text: "OK" }]
-        );
-      }
+      Alert.alert(
+        "Authentication Error", 
+        `Error: ${response.error?.description || response.error?.message || "Unknown error"}`,
+        [{ text: "OK" }]
+      );
+      setIsLoading(false);
+    } else if (response?.type === 'dismiss') {
+      console.log('Authentication was dismissed');
       setIsLoading(false);
     }
   }, [response]);
@@ -83,7 +60,7 @@ export function useGoogleAuth() {
         const parsedUserData = JSON.parse(userData);
         setUserInfo(parsedUserData);
         setIsLoggedIn(true);
-        console.log("User loaded from AsyncStorage:", parsedUserData);
+        console.log("User loaded from AsyncStorage");
       } else {
         console.log("No user found in AsyncStorage.");
       }
@@ -102,18 +79,21 @@ export function useGoogleAuth() {
         throw new Error('No authentication object returned');
       }
 
-      const { accessToken } = authentication;
-      console.log("Access token obtained:", accessToken ? "Yes" : "No");
+      const token = authentication.accessToken;
+      if (!token) {
+        throw new Error('No token found in authentication response');
+      }
       
-      // Fetch user info with the access token
+      console.log("Token obtained");
+      
+      // Fetch user info with the token
       const userInfoResponse = await fetch('https://www.googleapis.com/userinfo/v2/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       
       const userInfoData = await userInfoResponse.json();
-      console.log('User info fetched:', userInfoData);
+      console.log('User info fetched successfully');
       
-      // Important: Set both states in the same cycle
       setUserInfo(userInfoData);
       setIsLoggedIn(true);
       
@@ -122,9 +102,7 @@ export function useGoogleAuth() {
       console.log("User data stored successfully");
     } catch (error) {
       console.error('Error fetching user data:', error);
-      if (Platform.OS !== 'web') {
-        Alert.alert("Error", `Failed to get user data: ${error.message}`);
-      }
+      Alert.alert("Error", `Failed to get user data: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -136,15 +114,12 @@ export function useGoogleAuth() {
       // Clear any existing stored data before signing in
       await AsyncStorage.removeItem('userInfo');
       
-      console.log("Starting sign-in process");
+      console.log("Starting web sign-in process");
       const result = await promptAsync();
-      console.log('Prompt async result:', JSON.stringify(result, null, 2));
-      // The rest handled in the useEffect that watches response
+      console.log('Prompt async result type:', result.type);
     } catch (error) {
       console.error('Error during sign in:', error);
-      if (Platform.OS !== 'web') {
-        Alert.alert("Sign In Error", error.message);
-      }
+      Alert.alert("Sign In Error", error.message);
       setIsLoading(false);
     }
   };
@@ -170,4 +145,9 @@ export function useGoogleAuth() {
     request,
     response,
   };
+}
+
+// Legacy export for backward compatibility
+export function useGoogleAuth() {
+  return useWebGoogleAuth();
 }

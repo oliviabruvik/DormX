@@ -14,7 +14,8 @@
       "backgroundColor": "#ffffff"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/b88df7bc-2589-413b-8b2c-f3eab6ac6d41"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -22,8 +23,10 @@
     "ios": {
       "supportsTablet": true,
       "supportsMultipleScreens": true,
-      "scheme": "myapp",
-      "bundleIdentifier": "com.reneedw.myapp"
+      "bundleIdentifier": "com.reneedw.myapp",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -31,8 +34,12 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.reneedw.myapp",
+      "googleServicesFile": "./google-services.json",
       "supportsMultipleScreens": true,
-      "permissions": ["INTERNET"]
+      "permissions": [
+        "INTERNET",
+        "INTERNET"
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -40,12 +47,16 @@
     "plugins": [
       "expo-font",
       "expo-asset",
-      "expo-web-browser"
+      "expo-web-browser",
+      ["@react-native-google-signin/google-signin"]
     ],
     "extra": {
       "eas": {
         "projectId": "b88df7bc-2589-413b-8b2c-f3eab6ac6d41"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

@@ -7,13 +7,21 @@ import {
   Image,
   TouchableOpacity,
   Platform,
+  LogBox,
 } from 'react-native';
 import * as WebBrowser from 'expo-web-browser';
-import { useGoogleAuth } from './screens/WebAuth'; // Make sure this path is correct
+import { useGoogleAuth } from './screens/Auth'; // Make sure this path is correct
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import BottomTabNavigator from './navigation/BottomTabNavigator'; // Import your existing navigator
 import { SafeAreaProvider } from 'react-native-safe-area-context'; // Import SafeAreaProvider
+
+// Display logs in-app
+LogBox.ignoreAllLogs(false);
+LogBox.ignoreLogs(['specific warning to ignore']);  // Optional
+
+// In your components, add more console.log statements
+console.log('This will show in LogBox');
 
 // Make sure to call this at the top level of your file
 WebBrowser.maybeCompleteAuthSession();
