@@ -30,13 +30,13 @@ export default function BottomTabNavigator() {
           backgroundColor: Colors[theme]?.cardBackground,
           borderTopColor: "rgba(0, 0, 0, 0.3)",
           borderTopWidth: 1,
-          paddingBottom: 5,
+          paddingBottom: 9,
           paddingTop: 5,
-          height: 60,
+          height: 70,
         },
         tabBarLabelStyle: {
           fontSize: 12,
-          marginBottom: 3,
+          marginBottom: 5,
         },
       }}
     >

@@ -4,7 +4,7 @@ const tintColorDark = "#8F88FF"; // Lighter purple for dark mode
 
 export default {
   // Base colors
-  primary: "#6C63FF", // Deep purple/indigo
+  primary: "#7B5AFF", // Deep purple/indigo
   secondary: "#626988", // Muted slate
   success: "#2BD9A8", // Teal
   info: "#00C9FF", // Bright blue
@@ -29,7 +29,7 @@ export default {
   // Dark mode (even darker)
   dark: {
     text: "#FFFFFF", // White
-    background: "#13131A", // Near black
+    background: "#2D2B46", // Near black
     tint: tintColorDark,
     tabIconDefault: "#7E7E95", // Muted purple-gray
     tabIconSelected: tintColorDark,
