@@ -1,13 +1,15 @@
+// Updated BottomTabNavigator.js - Remove redundant SafeAreaView
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useColorScheme } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import Colors from "../constants/Colors";
 import HomeScreen from "../screens/HomeScreen";
 import ChatsScreen from "../screens/ChatsScreen";
+import ChannelsScreen from "../screens/ChannelsScreen";
 import GalleryScreen from "../screens/GalleryScreen";
+import ProfileScreen from "../screens/ProfileScreen"; // Import the new ProfileScreen
 import ClassScreen from "../screens/ClassScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
@@ -19,8 +21,6 @@ export default function BottomTabNavigator() {
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
 
   return (
-    // put in safe view
-    <SafeAreaView style={{ flex: 1 }}>
     <BottomTab.Navigator
       initialRouteName="Home"
       screenOptions={{
@@ -81,7 +81,6 @@ export default function BottomTabNavigator() {
         }}
       />
     </BottomTab.Navigator>
-    </SafeAreaView>
   );
 }
 
@@ -110,9 +109,16 @@ function HomeNavigator() {
         options={{ headerShown: false, headerTitle: "Home"}}
       />
       <HomeStack.Screen
+        name="ChannelsScreen" 
+        component={ChannelsScreen}
+        options={{ headerTitle: "Channels" }}
+      />
+      <HomeStack.Screen
         name="ChatsScreen" 
         component={ChatsScreen}
-        options={{ headerTitle: "Chats" }}
+        options={({ route }) => ({ 
+          headerTitle: route.params?.channelName || "Chats" 
+        })}
       />
       <HomeStack.Screen
         name="GalleryScreen" 
@@ -155,12 +161,9 @@ function ExploreNavigator() {
   );
 }
 
-// Profile navigator stack (placeholder)
+// Profile navigator stack - Updated with new ProfileScreen
 const ProfileStack = createStackNavigator();
 function ProfileNavigator() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? 'dark' : 'light';
-
   return (
     <ProfileStack.Navigator
       screenOptions={{
@@ -175,7 +178,7 @@ function ProfileNavigator() {
     >
       <ProfileStack.Screen
         name="ProfileScreen"
-        component={TabTwoScreen}
+        component={ProfileScreen}
         options={{ headerTitle: "Profile" }}
       />
     </ProfileStack.Navigator>

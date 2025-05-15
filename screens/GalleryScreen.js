@@ -18,10 +18,9 @@ export default function GalleryScreen() {
   
     // Albums with name of event and a cover image
     const images = [
-        //{ id: 1, title: "Chats", Image: require('../assets/images/adaptive-icon.png')},
         { id: 1, title: "Event 1", source: require('../assets/images/example_image.jpeg')},
         { id: 2, title: "Event 2", source: require('../assets/images/example_image.jpeg')},
-        { id: 3, title: "Event 3"},
+        { id: 3, title: "Event 3 with a long name to see what happens"},
         { id: 4, title: "Event 4", source: require('../assets/images/example_image.jpeg')},
         { id: 5, title: "Event 5", source: require('../assets/images/example_image.jpeg')},
         { id: 6, title: "Event 6"},
@@ -107,7 +106,9 @@ const PhotoAlbumItem = ({ title, imageSource, containerStyle, imageStyle, onPres
         style={[styles.galleryImage, imageStyle]}
         resizeMode="cover"
       />
-      <Text style={styles.galleryTitle}>{title}</Text>
+      <Text style={styles.galleryTitle}
+        numberOfLines={2}
+        ellipsizeMode="tail">{title}</Text>
     </TouchableOpacity>
   );
 
