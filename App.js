@@ -3,6 +3,7 @@ import "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { useColorScheme, Platform } from "react-native";
+import { PaperProvider } from 'react-native-paper';
 
 import { useLoadedAssets } from "./hooks/useLoadedAssets";
 import Navigation from "./navigation";
@@ -17,13 +18,15 @@ export default function App() {
     return null;
   } else {
     return (
-      <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
-        <StatusBar 
-          style="light"
-          backgroundColor={Colors.primary}
-        />
-      </SafeAreaProvider>
+      <PaperProvider>
+        <SafeAreaProvider>
+          <Navigation colorScheme={colorScheme} />
+          <StatusBar 
+            style="light"
+            backgroundColor={Colors.primary}
+          />
+        </SafeAreaProvider>
+      </PaperProvider>
     );
   }
 }

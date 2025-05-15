@@ -8,6 +8,7 @@ import Colors from "../constants/Colors";
 import HomeScreen from "../screens/HomeScreen";
 import ChatsScreen from "../screens/ChatsScreen";
 import GalleryScreen from "../screens/GalleryScreen";
+import ClassScreen from "../screens/ClassScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 
@@ -117,6 +118,11 @@ function HomeNavigator() {
         name="GalleryScreen" 
         component={GalleryScreen}
         options={{ headerTitle: "Gallery" }}
+      />
+      <HomeStack.Screen
+        name="ClassScreen" 
+        component={ClassScreen}
+        options={{ headerTitle: "Dorm Classes" }}
       />
     </HomeStack.Navigator>
   );
