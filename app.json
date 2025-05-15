@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
-    "owner": "reneedw",
+    "owner": "cs278",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -34,10 +34,24 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.reneedw.myapp",
-      "googleServicesFile": "./google-services.json",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "myapp",
+              "host": "auth.callback"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "supportsMultipleScreens": true,
       "permissions": [
-        "INTERNET",
         "INTERNET"
       ]
     },
@@ -48,7 +62,8 @@
       "expo-font",
       "expo-asset",
       "expo-web-browser",
-      ["@react-native-google-signin/google-signin"]
+      "expo-secure-store",
+      "@react-native-google-signin/google-signin"
     ],
     "extra": {
       "eas": {
