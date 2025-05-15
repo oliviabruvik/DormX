@@ -10,6 +10,12 @@ import {
 import { Text, View } from "../components/Themed";
 import Svg, { Circle, Path, Rect, G } from "react-native-svg";
 import Colors from "../constants/Colors";
+import { Card, Title, Paragraph } from 'react-native-paper';
+
+import { PaperProvider } from 'react-native-paper';
+
+
+
 
 // Animated Chat Icon Component
 const ChatAnimation = ({ color }) => {
@@ -290,7 +296,7 @@ export default function HomeScreen({ navigation }) {
         onPress={() => {
           console.log(`Pressed ${feature.title}`);
           if (feature.title === "Chats") {
-            navigation.navigate('ChannelsScreen')
+            navigation.navigate('ChatsScreen')
           }
           if (feature.title === "Gallery") {
             navigation.navigate('GalleryScreen')
@@ -307,7 +313,7 @@ export default function HomeScreen({ navigation }) {
   // Chat press handler
   const handleChatPress = () => {
     console.log('Pressed Chats');
-    navigation.navigate('ChannelsScreen');
+    navigation.navigate('ChatsScreen');
   };
 
   // Chat press handler
@@ -319,12 +325,13 @@ export default function HomeScreen({ navigation }) {
   return (
     // put in safe view
     <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
-      <View style={[styles.header, { backgroundColor: Colors.primary }]}>
-        <Text style={styles.title}>DormX</Text>
-        <Text style={styles.subtitle}>Your Dorm Life Companion</Text>
-      </View>
-
       <ScrollView>
+        <Card style={styles.welcomeCard}>
+          <Card.Content>
+            <Title>Welcome to DormX!</Title>
+            <Paragraph>Your Dorm Life Companion</Paragraph>
+          </Card.Content>
+        </Card>
         <View style={styles.featuresContainer}>{renderFeatures()}</View>
       </ScrollView>
     </View>
@@ -398,5 +405,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  welcomeCard: {
+    margin: 16,
+    elevation: 4,
   },
 });

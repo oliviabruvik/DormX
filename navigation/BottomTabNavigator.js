@@ -10,6 +10,7 @@ import ChatsScreen from "../screens/ChatsScreen";
 import ChannelsScreen from "../screens/ChannelsScreen";
 import GalleryScreen from "../screens/GalleryScreen";
 import ProfileScreen from "../screens/ProfileScreen"; // Import the new ProfileScreen
+import ClassScreen from "../screens/ClassScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 
@@ -123,6 +124,11 @@ function HomeNavigator() {
         name="GalleryScreen" 
         component={GalleryScreen}
         options={{ headerTitle: "Gallery" }}
+      />
+      <HomeStack.Screen
+        name="ClassScreen" 
+        component={ClassScreen}
+        options={{ headerTitle: "Dorm Classes" }}
       />
     </HomeStack.Navigator>
   );

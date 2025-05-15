@@ -10,10 +10,10 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import BottomTabNavigator from './navigation/BottomTabNavigator'; // Import your existing navigator
 import { SafeAreaProvider } from 'react-native-safe-area-context'; // Import SafeAreaProvider
-
-// Display logs in-app
-LogBox.ignoreAllLogs(false);
-LogBox.ignoreLogs(['specific warning to ignore']);  // Optional
+import { StatusBar } from "expo-status-bar";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useColorScheme, Platform } from "react-native";
+import { PaperProvider } from 'react-native-paper';
 
 // In your components, add more console.log statements
 console.log('App starting - Authentication bypassed');
@@ -51,17 +51,19 @@ export default function App() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-  },
-  centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+  if (!isLoadingComplete) {
+    return null;
+  } else {
+    return (
+      <PaperProvider>
+        <SafeAreaProvider>
+          <Navigation colorScheme={colorScheme} />
+          <StatusBar 
+            style="light"
+            backgroundColor={Colors.primary}
+          />
+        </SafeAreaProvider>
+      </PaperProvider>
+    );
+  }
+}
