@@ -30,8 +30,8 @@ export default function App() {
     isLoggedIn: true,  // Always true to bypass login
     isLoading: false,
     userInfo: {
-      name: 'Test User',
-      email: 'test@example.com',
+      name: 'Bichael Mernstein',
+      email: 'bim@gmail.com',
       // Add any other user properties your app expects
     },
     signIn: () => console.log('Sign in bypassed'),

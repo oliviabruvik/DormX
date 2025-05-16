@@ -24,7 +24,8 @@ export default function ChannelsScreen({ navigation }) {
     { id: 5, name: 'Dorm Committee'},
     { id: 6, name: 'Events'},
     { id: 7, name: 'Announcements'},
-    { id: 8, name: 'General'}
+    { id: 8, name: 'General'},
+    { id: 9, name: 'Lockouts'}
   ];
 
   // Chat press handler
