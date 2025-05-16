@@ -143,7 +143,7 @@ export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: Colors[theme].background }]}>
       <LinearGradient
-        colors={["#FF7143", "#FF9E6A"]}
+        colors={["#7B5AFF", "#3B1AFA"]}
         style={styles.header}
       >
         <Text style={styles.title}>DormX</Text>
@@ -179,12 +179,12 @@ const styles = StyleSheet.create({
     fontSize: 34,
     fontWeight: "800",
     letterSpacing: 0.8,
-    color: "#FFFFFF",
+    color: "rgba(240, 213, 220, 0.9)",
   },
   subtitle: {
     fontSize: 16,
     fontWeight: "500",
-    color: "rgba(198, 72, 99, 0.8)",
+    color: "rgb(228, 205, 113)",
     marginTop: 4,
   },
   
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     letterSpacing: 0.3,
     textAlign: "center",
-    color: "#B6543D", // Warm terracotta tone
+    color: "rgba(240, 213, 220, 0.9)",
   },
   
   
