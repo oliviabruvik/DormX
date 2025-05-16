@@ -1,11 +1,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, useColorScheme, TouchableOpacity } from 'react-native';
 import Colors from '../constants/Colors';
+import { Avatar, Button, Card, Title, Paragraph, Searchbar, Text as PaperText } from 'react-native-paper';
 
 export default function ChannelsScreen({ navigation }) {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
-  
+
+  // Header component
+  const ChannelsHeader = () => {
+    return (
+        <View style={styles.header}>
+            <PaperText style={styles.headerText}>My Channels</PaperText>
+        </View>
+    );
+  };
   // Sample chat data (you would replace this with real data)
   const channels = [
     { id: 1, name: 'RAS ONLY'},
@@ -45,8 +54,9 @@ export default function ChannelsScreen({ navigation }) {
 
   return (
     // put in safe view
-    <View style={[styles.container, { backgroundColor: Colors[theme].backgroundColor }]}>
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
       <ScrollView>
+        <ChannelsHeader />
         <View style={styles.featuresContainer}>{renderFeatures()}</View>
       </ScrollView>
     </View>
@@ -57,6 +67,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+  },
+  header: {
+    padding: 15,
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  headerText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 24,
   },
   chatItem: {
     flexDirection: 'row',
