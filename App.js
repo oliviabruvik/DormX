@@ -10,6 +10,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native';
 import BottomTabNavigator from './navigation/BottomTabNavigator'; // Import your existing navigator
 import { SafeAreaProvider } from 'react-native-safe-area-context'; // Import SafeAreaProvider
+import { PaperProvider } from 'react-native-paper';
 
 // Display logs in-app
 LogBox.ignoreAllLogs(false);
@@ -41,6 +42,7 @@ export default function App() {
 
   // Directly show the main app with navigation
   return (
+    <PaperProvider>
     <SafeAreaProvider>
       <AuthContext.Provider value={mockAuth}>
         <NavigationContainer>
@@ -48,6 +50,7 @@ export default function App() {
         </NavigationContainer>
       </AuthContext.Provider>
     </SafeAreaProvider>
+    </PaperProvider>
   );
 }
 
