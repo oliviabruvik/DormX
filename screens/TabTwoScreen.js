@@ -1,27 +1,62 @@
-import { StyleSheet } from "react-native";
+import React from 'react';
+import { View, StyleSheet, useColorScheme } from 'react-native';
+import Colors from '../constants/Colors';
+import { TextInput, Text as PaperText } from 'react-native-paper';
 
-import EditScreenInfo from "../components/EditScreenInfo";
-import { Text, View } from "../components/Themed";
 
 export default function TabTwoScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Tab Two</Text>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
+
+  const colorScheme = useColorScheme();
+  const theme = colorScheme === 'dark' ? 'dark' : 'light';
+
+  // Header component
+  const AIHeader = () => {
+    return (
+        <View style={styles.header}>
+            <PaperText style={styles.headerText}>Ask any question about the dorm!</PaperText>
+        </View>
+    );
+  };
+
+  const AIAssistant = () => {
+    const [text, setText] = React.useState("");
+  
+    return (
+      <TextInput
+        label="Ask AI"
+        value={text}
+        onChangeText={text => setText(text)}
+        style={styles.textInput}
       />
-      <EditScreenInfo path="/screens/TabTwoScreen.tsx" />
+    );
+  };
+
+  return (
+    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
+      <AIHeader />
+      <AIAssistant />
     </View>
   );
 }
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  header: {
+    padding: 15,
     alignItems: "center",
-    justifyContent: "center",
+    marginBottom: 15,
+    width: '70%',
+    alignSelf: 'center',
+    marginTop: 200,
+  },
+  headerText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 30,
   },
   title: {
     fontSize: 20,
@@ -31,5 +66,10 @@ const styles = StyleSheet.create({
     marginVertical: 30,
     height: 1,
     width: "80%",
+  },
+  textInput: {
+    width: '90%',
+    alignSelf: 'center',
+    marginTop: 15,
   },
 });
