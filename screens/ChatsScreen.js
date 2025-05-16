@@ -1,27 +1,51 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, useColorScheme } from 'react-native';
 import Colors from '../constants/Colors';
+import { Avatar, Button, Card, Title, Paragraph, Searchbar, TextInput, Text as PaperText } from 'react-native-paper';
 
 export default function ChatsScreen({ navigation, route}) {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
 
   const { channelName = 'General' } = route.params || {};
+
+  // Header component
+  const ChatsHeader = () => {
+    return (
+        <View style={styles.header}>
+            <PaperText style={styles.headerText}>My Chats</PaperText>
+        </View>
+    );
+  };
+
+  // Text input component
+  const TextInputComponent = () => {
+    const [text, setText] = React.useState("");
+  
+    return (
+      <TextInput
+        label="New message..."
+        value={text}
+        onChangeText={text => setText(text)}
+      />
+    );
+  };
   
   // Sample chat data (you would replace this with real data)
   const chats = [
-    { id: 1, name: 'User 1 ', lastMessage: '', time: '10:30 AM' },
-    { id: 2, name: 'User 2', lastMessage: 'Super long message just to see what happens how many lines can it go to?', time: 'Monday' },
-    { id: 3, name: 'Super long user name just to see what happens how many lines can it go to?', lastMessage: 'message', time: 'Two Days Ago' },
-    { id: 4, name: 'User 3', lastMessage: 'Temp Message', time: 'Sunday' },
-    { id: 5, name: 'User 3' },
-    { id: 6, name: 'User 1' },
-    { id: 7, name: 'User 2' }
+    { id: 1, name: 'Olivia Beyer Bruvik', lastMessage: 'Reminder: Floor meeting tonight at 8pm in the common room', time: '10:30 AM' },
+    { id: 2, name: 'Yousef AbuHashem', lastMessage: 'Can someone cover my duty shift this Saturday? Family emergency', time: 'Monday' },
+    { id: 3, name: 'Renee White', lastMessage: 'Just did room checks - all good on 3rd floor', time: 'Two Days Ago' },
+    { id: 4, name: 'Olivia Beyer Bruvik', lastMessage: 'Heads up: maintenance coming tomorrow to fix the washing machines', time: 'Sunday' },
+    { id: 5, name: 'Leslie Jin', lastMessage: 'Need help with a resident situation on 2nd floor', time: 'Yesterday' },
+    { id: 6, name: 'Leslie Jin', lastMessage: 'Updated duty schedule posted in the RA office', time: 'Last Week' },
+    { id: 7, name: 'Yousef AbuHashem', lastMessage: 'Fire alarm test scheduled for next Tuesday at 2pm', time: 'Last Week' }
   ];
 
   return (
     <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>   
       <ScrollView style={styles.chatList}>
+        <ChatsHeader />
         {chats.map(chat => (
           <View 
             key={chat.id} 
@@ -40,7 +64,7 @@ export default function ChatsScreen({ navigation, route}) {
               </View>
               <Text 
                 style={styles.chatMessage}
-                numberOfLines={1}
+                //numberOfLines={1}
                 ellipsizeMode="tail"
               >
                 {chat.lastMessage || "No messages yet"}
@@ -48,6 +72,7 @@ export default function ChatsScreen({ navigation, route}) {
             </View>
           </View>
         ))}
+        <TextInputComponent />
       </ScrollView>
     </View>
   );
@@ -60,6 +85,16 @@ const styles = StyleSheet.create({
   chatList: {
     flex: 1,
     padding: 10,
+  },
+  header: {
+    padding: 15,
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  headerText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    fontSize: 24,
   },
   chatItem: {
     flexDirection: 'row',
@@ -111,6 +146,6 @@ const styles = StyleSheet.create({
   },
   chatMessage: {
     fontSize: 14,
-    color: '#666',
+    color: 'white',
   },
 });

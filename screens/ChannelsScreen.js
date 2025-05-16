@@ -17,11 +17,14 @@ export default function ChannelsScreen({ navigation }) {
   };
   // Sample chat data (you would replace this with real data)
   const channels = [
-    { id: 1, name: 'RAS ONLY'},
+    { id: 1, name: 'Resident Assistants'},
     { id: 2, name: 'Floor 1'},
     { id: 3, name: 'Floor 2'},
     { id: 4, name: 'Floor 3'},
-    { id: 5, name: 'Events' }
+    { id: 5, name: 'Dorm Committee'},
+    { id: 6, name: 'Events'},
+    { id: 7, name: 'Announcements'},
+    { id: 8, name: 'General'}
   ];
 
   // Chat press handler
