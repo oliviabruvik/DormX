@@ -46,7 +46,7 @@ export default function App() {
     <SafeAreaProvider>
       <AuthContext.Provider value={mockAuth}>
         <NavigationContainer>
-          <BottomTabNavigator />
+            <BottomTabNavigator />
         </NavigationContainer>
       </AuthContext.Provider>
     </SafeAreaProvider>

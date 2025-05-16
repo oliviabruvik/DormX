@@ -1,305 +1,129 @@
-import React, { useRef, useEffect } from "react";
-import { 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
-  Animated, 
-  Easing,
-  useColorScheme
+import React from "react";
+import {
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  useColorScheme,
 } from "react-native";
 import { Text, View } from "../components/Themed";
-import Svg, { Circle, Path, Rect, G } from "react-native-svg";
+import Svg, { Rect, Circle, Path } from "react-native-svg";
 import Colors from "../constants/Colors";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from 'expo-linear-gradient';
 
-// Animated Chat Icon Component
-const ChatAnimation = ({ color }) => {
-  const translateY = useRef(new Animated.Value(0)).current;
-  
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(translateY, {
-          toValue: -5,
-          duration: 1000,
-          easing: Easing.out(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: 1000,
-          easing: Easing.in(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
+const ChatIcon = ({ color }) => (
+  <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
+    <Path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z" stroke={color} strokeWidth={4} />
+    <Path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" stroke={color} strokeWidth={2} />
+  </Svg>
+);
 
-  return (
-    <View style={styles.iconContainer}>
-      <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-        {/* Base bubble */}
-        <Rect x="5" y="10" width="40" height="30" rx="15" fill={color} opacity={0.8} />
-        
-        {/* Animated bubble */}
-        <Animated.View style={{ transform: [{ translateY }] }}>
-          <Svg width="50" height="50" viewBox="0 0 50 50">
-            <Circle cx="20" cy="25" r="4" fill="#FFFFFF" />
-            <Circle cx="30" cy="25" r="4" fill="#FFFFFF" />
-            <Circle cx="40" cy="25" r="4" fill="#FFFFFF" />
-          </Svg>
-        </Animated.View>
-      </Svg>
-    </View>
-  );
-};
+const GalleryIcon = ({ color }) => (
+  <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
+    <Path d="M18 22H4a2 2 0 0 1-2-2V6" stroke={color} strokeWidth={2} />
+    <Path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18" stroke={color} strokeWidth={4} />
+    <Circle cx="12" cy="8" r="2" fill={color} />
+    <Rect width="16" height="16" x="6" y="2" rx="2" stroke={color} strokeWidth={2} />
+  </Svg>
+);
 
-// Animated Gallery Icon Component
-const GalleryAnimation = ({ color }) => {
-  const rotate = useRef(new Animated.Value(0)).current;
-  
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(rotate, {
-        toValue: 1,
-        duration: 3000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
-    ).start();
-  }, []);
 
-  const spin = rotate.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '360deg']
-  });
 
-  return (
-    <View style={styles.iconContainer}>
-      <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-        <Rect x="10" y="10" width="15" height="15" rx="2" fill={color} />
-        <Rect x="30" y="10" width="10" height="10" rx="2" fill={color} opacity={0.7} />
-        <Rect x="10" y="30" width="10" height="10" rx="2" fill={color} opacity={0.7} />
-        <Animated.View style={{ transform: [{ rotate: spin }] }}>
-          <Svg width="50" height="50" viewBox="0 0 50 50">
-            <Rect x="25" y="25" width="15" height="15" rx="2" fill="#FFFFFF" opacity={0.9} />
-          </Svg>
-        </Animated.View>
-      </Svg>
-    </View>
-  );
-};
+const CalendarIcon = ({ color }) => (
+  // learn:     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days-icon lucide-calendar-days"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+  <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
+    <Path d="M8 2v4" stroke={color} strokeWidth={2} />
+    <Path d="M16 2v4" stroke={color} strokeWidth={2} />
+    <Rect width="18" height="18" x="3" y="4" rx="2" stroke={color} strokeWidth={2} />
+    <Path d="M3 10h18" stroke={color} strokeWidth={2} />
+    <Path d="M8 14h.01" stroke={color} strokeWidth={2} />
+    <Path d="M12 14h.01" stroke={color} strokeWidth={2} />
+    <Path d="M16 14h.01" stroke={color} strokeWidth={2} />
+    <Path d="M8 18h.01" stroke={color} strokeWidth={2} />
+    <Path d="M12 18h.01" stroke={color} strokeWidth={2} />
+    <Path d="M16 18h.01" stroke={color} strokeWidth={2} />
+  </Svg>
+);
 
-// Animated Calendar Icon Component
-const CalendarAnimation = ({ color }) => {
-  const scale = useRef(new Animated.Value(1)).current;
-  
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(scale, {
-          toValue: 1.1,
-          duration: 1000,
-          easing: Easing.ease,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.ease,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
+const ClassesIcon = ({ color }) => (
+  // learn: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-school-icon lucide-school"><path d="M14 22v-4a2 2 0 1 0-4 0v4"/><path d="m18 10 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7.382a1 1 0 0 1 .553-.894L6 10"/><path d="M18 5v17"/><path d="m4 6 7.106-3.553a2 2 0 0 1 1.788 0L20 6"/><path d="M6 5v17"/><circle cx="12" cy="9" r="2"/></svg>
+  <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
+    <Path d="M14 22v-4a2 2 0 1 0-4 0v4" stroke={color} strokeWidth={2} />
+    <Path d="m18 10 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7.382a1 1 0 0 1 .553-.894L6 10" stroke={color} strokeWidth={2} />
+    <Path d="M18 5v17" stroke={color} strokeWidth={2} />
+    <Path d="m4 6 7.106-3.553a2 2 0 0 1 1.788 0L20 6" stroke={color} strokeWidth={2} />
+    <Path d="M6 5v17" stroke={color} strokeWidth={2} />
+    <Circle cx="12" cy="9" r="2" fill={color} />
+  </Svg>
+);
 
-  return (
-    <View style={styles.iconContainer}>
-      <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-        <Rect x="10" y="10" width="30" height="30" rx="3" fill={color} />
-        <Rect x="10" y="10" width="30" height="7" rx="2" fill={color} opacity={0.7} />
-        <Animated.View style={{ transform: [{ scale }] }}>
-          <Svg width="50" height="50" viewBox="0 0 50 50">
-            <Circle cx="25" cy="27" r="5" fill="#FFFFFF" />
-          </Svg>
-        </Animated.View>
-      </Svg>
-    </View>
-  );
-};
+const MarketplaceIcon = ({ color }) => (
+  <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+    <Rect x="10" y="10" width="30" height="30" rx="15" fill={color} />
+    <Path d="M20 15L30 25L20 35" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+  </Svg>
+);
 
-// Animated Classes Icon Component
-const ClassesAnimation = ({ color }) => {
-  const translateX = useRef(new Animated.Value(0)).current;
-  
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(translateX, {
-          toValue: 5,
-          duration: 1000,
-          easing: Easing.out(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateX, {
-          toValue: -5,
-          duration: 1000,
-          easing: Easing.in(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateX, {
-          toValue: 0,
-          duration: 1000,
-          easing: Easing.in(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  return (
-    <View style={styles.iconContainer}>
-      <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-        <Rect x="10" y="15" width="30" height="20" rx="3" fill={color} />
-        <Animated.View style={{ transform: [{ translateX }] }}>
-          <Svg width="50" height="50" viewBox="0 0 50 50">
-            <Rect x="15" y="20" width="20" height="3" rx="1.5" fill="#FFFFFF" />
-            <Rect x="15" y="26" width="20" height="3" rx="1.5" fill="#FFFFFF" />
-          </Svg>
-        </Animated.View>
-      </Svg>
-    </View>
-  );
-};
-
-// Animated Marketplace Icon Component
-const MarketplaceAnimation = ({ color }) => {
-  const opacity = useRef(new Animated.Value(0.5)).current;
-  
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 1000,
-          easing: Easing.ease,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacity, {
-          toValue: 0.5,
-          duration: 1000,
-          easing: Easing.ease,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  return (
-    <View style={styles.iconContainer}>
-      <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-        <Rect x="10" y="10" width="30" height="30" rx="15" fill={color} />
-        <Animated.View style={{ opacity }}>
-          <Svg width="50" height="50" viewBox="0 0 50 50">
-            <Path d="M20 15L30 25L20 35" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          </Svg>
-        </Animated.View>
-      </Svg>
-    </View>
-  );
-};
-
-// Animated Resources Icon Component
-const ResourcesAnimation = ({ color }) => {
-  const translateY = useRef(new Animated.Value(0)).current;
-  
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(translateY, {
-          toValue: -3,
-          duration: 700,
-          easing: Easing.out(Easing.sin),
-          useNativeDriver: true,
-        }),
-        Animated.timing(translateY, {
-          toValue: 0,
-          duration: 700,
-          easing: Easing.in(Easing.sin),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, []);
-
-  return (
-    <View style={styles.iconContainer}>
-      <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-        <Rect x="10" y="15" width="30" height="25" rx="3" fill={color} />
-        <Rect x="15" y="10" width="20" height="7" rx="2" fill={color} opacity={0.7} />
-        <Animated.View style={{ transform: [{ translateY }] }}>
-          <Svg width="50" height="50" viewBox="0 0 50 50">
-            <Rect x="15" y="25" width="20" height="3" rx="1.5" fill="#FFFFFF" />
-            <Rect x="15" y="32" width="20" height="3" rx="1.5" fill="#FFFFFF" />
-          </Svg>
-        </Animated.View>
-      </Svg>
-    </View>
-  );
-};
+const ResourcesIcon = ({ color }) => (
+  <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+    <Rect x="10" y="15" width="30" height="25" rx="3" fill={color} />
+    <Rect x="15" y="10" width="20" height="7" rx="2" fill={color} opacity={0.7} />
+    <Rect x="15" y="25" width="20" height="3" rx="1.5" fill="#FFFFFF" />
+    <Rect x="15" y="32" width="20" height="3" rx="1.5" fill="#FFFFFF" />
+  </Svg>
+);
 
 // Feature grid item component
-const FeatureItem = ({ title, AnimatedIcon, onPress }) => {
+const FeatureItem = ({ title, Icon, onPress }) => {
   const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? 'dark' : 'light';
-  
+  const theme = colorScheme === "dark" ? "dark" : "light";
+
   return (
-    <TouchableOpacity 
-      style={[
-        styles.featureItem, 
-        { backgroundColor: Colors[theme].cardBackground }
-      ]} 
+    <Pressable
+      style={({ pressed }) => [
+        styles.featureItem,
+        { backgroundColor: Colors[theme].cardBackground },
+        pressed && {
+          transform: [{ scale: 0.97 }],
+          shadowColor: "#A58AFF",
+          shadowOpacity: 0.4,
+          shadowRadius: 8,
+        },        
+      ]}
       onPress={onPress}
     >
-      <AnimatedIcon color={Colors.primary} />
+      <View style={styles.iconContainer}>
+        <Icon color={Colors.primary} />
+      </View>
       <Text style={styles.featureTitle}>{title}</Text>
-    </TouchableOpacity>
+    </Pressable>
   );
 };
 
 export default function HomeScreen({ navigation }) {
   const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? 'dark' : 'light';
-  
-  // Features data with animated components
+  const theme = colorScheme === "dark" ? "dark" : "light";
+
   const features = [
-    { id: 1, title: "Chats", AnimatedIcon: ChatAnimation },
-    { id: 2, title: "Gallery", AnimatedIcon: GalleryAnimation },
-    { id: 3, title: "Calendar", AnimatedIcon: CalendarAnimation },
-    { id: 4, title: "Dorm Classes", AnimatedIcon: ClassesAnimation },
-    { id: 5, title: "Marketplace", AnimatedIcon: MarketplaceAnimation },
-    { id: 6, title: "Resources", AnimatedIcon: ResourcesAnimation },
+    { id: 1, title: "Chats", Icon: ChatIcon },
+    { id: 2, title: "Gallery", Icon: GalleryIcon },
+    { id: 3, title: "Calendar", Icon: CalendarIcon },
+    { id: 4, title: "Dorm Classes", Icon: ClassesIcon },
+    // { id: 5, title: "Marketplace", Icon: MarketplaceIcon },
+    // { id: 6, title: "Resources", Icon: ResourcesIcon },
   ];
 
-  // Render grid of features
   const renderFeatures = () => {
     return features.map((feature) => (
       <FeatureItem
         key={feature.id}
         title={feature.title}
-        AnimatedIcon={feature.AnimatedIcon}
+        Icon={feature.Icon}
         onPress={() => {
-          console.log(`Pressed ${feature.title}`);
-          if (feature.title === "Chats") {
-            navigation.navigate('ChannelsScreen')
-          }
-          if (feature.title === "Gallery") {
-            navigation.navigate('GalleryScreen')
-          }
-          if (feature.title === "Dorm Classes") {
-            navigation.navigate('ClassScreen')
-          }
-        }
-      }
+          if (feature.title === "Chats") navigation.navigate("ChannelsScreen");
+          if (feature.title === "Gallery") navigation.navigate("GalleryScreen");
+          if (feature.title === "Dorm Classes") navigation.navigate("ClassScreen");
+        }}
       />
     ));
   };
@@ -317,17 +141,18 @@ export default function HomeScreen({ navigation }) {
   };
 
   return (
-    // put in safe view
-    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
-      <View style={[styles.header, { backgroundColor: Colors.primary }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: Colors[theme].background }]}>
+      <LinearGradient
+        colors={["#FF7143", "#FF9E6A"]}
+        style={styles.header}
+      >
         <Text style={styles.title}>DormX</Text>
         <Text style={styles.subtitle}>Your Dorm Life Companion</Text>
-      </View>
-
-      <ScrollView>
-        <View style={styles.featuresContainer}>{renderFeatures()}</View>
+      </LinearGradient>
+      <ScrollView contentContainerStyle={styles.featuresContainer}>
+        {renderFeatures()}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -336,67 +161,75 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: 20,
+    // backgroundColor: "#FFD9C3", // soft warm peach
+    paddingTop: 30,
+    paddingBottom: 32,
+    paddingHorizontal: 20,
     alignItems: "center",
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
     marginBottom: 20,
   },
+  
   title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
+    fontSize: 34,
+    fontWeight: "800",
+    letterSpacing: 0.8,
+    color: "#FFFFFF",
   },
   subtitle: {
     fontSize: 16,
-    color: "rgba(255, 255, 255, 0.8)",
-    marginTop: 5,
+    fontWeight: "500",
+    color: "rgba(198, 72, 99, 0.8)",
+    marginTop: 4,
   },
+  
   featuresContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 20,
+    justifyContent: "space-around",
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 40,
+    rowGap: 24, // better vertical spacing
   },
+  
   featureItem: {
-    width: "30%",
+    width: "42%",
     aspectRatio: 1,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 20,
+    padding: 12,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 6,
+    
   },
   featureTitle: {
     marginTop: 12,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.3,
     textAlign: "center",
-    fontWeight: "500",
-    color: "white",
+    color: "#B6543D", // Warm terracotta tone
   },
+  
+  
   iconContainer: {
+    marginBottom: 12, // adds visual separation from text    
     width: 50,
     height: 50,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "transparent",
   },
-  button: {
-    backgroundColor: '#2196F3',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 10,
-    minWidth: 150,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+  // Icon: { size: 440 } // bump up size slightly
+
 });
