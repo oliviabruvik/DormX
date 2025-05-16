@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, useColorScheme } from 'react-native';
+import React, { useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, useColorScheme, KeyboardAvoidingView, Platform } from 'react-native';
 import Colors from '../constants/Colors';
 import { Avatar, Button, Card, Title, Paragraph, Searchbar, TextInput, Text as PaperText } from 'react-native-paper';
 
 export default function ChatsScreen({ navigation, route}) {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const scrollViewRef = useRef(null);
 
   const { channelName = 'General' } = route.params || {};
 
@@ -23,11 +24,15 @@ export default function ChatsScreen({ navigation, route}) {
     const [text, setText] = React.useState("");
   
     return (
-      <TextInput
-        label="New message..."
-        value={text}
-        onChangeText={text => setText(text)}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          label="New message..."
+          value={text}
+          onChangeText={text => setText(text)}
+          autoFocus={true}
+          style={styles.textInput}
+        />
+      </View>
     );
   };
   
@@ -42,10 +47,27 @@ export default function ChatsScreen({ navigation, route}) {
     { id: 7, name: 'Yousef AbuHashem', lastMessage: 'Fire alarm test scheduled for next Tuesday at 2pm', time: 'Last Week' }
   ];
 
+  // Scroll to bottom when component mounts
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      setTimeout(() => {
+        scrollViewRef.current.scrollToEnd({ animated: false });
+      }, 100);
+    }
+  }, []);
+
   return (
-    <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>   
-      <ScrollView style={styles.chatList}>
-        <ChatsHeader />
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={[styles.container, { backgroundColor: Colors[theme].background }]}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+    >   
+      <ScrollView 
+        ref={scrollViewRef}
+        style={styles.chatList}
+        contentContainerStyle={styles.chatListContent}
+      >
+        {/* <ChatsHeader /> */}
         {chats.map(chat => (
           <View 
             key={chat.id} 
@@ -64,7 +86,6 @@ export default function ChatsScreen({ navigation, route}) {
               </View>
               <Text 
                 style={styles.chatMessage}
-                //numberOfLines={1}
                 ellipsizeMode="tail"
               >
                 {chat.lastMessage || "No messages yet"}
@@ -72,9 +93,9 @@ export default function ChatsScreen({ navigation, route}) {
             </View>
           </View>
         ))}
-        <TextInputComponent />
       </ScrollView>
-    </View>
+      <TextInputComponent />
+    </KeyboardAvoidingView>
   );
 }
 
@@ -84,7 +105,16 @@ const styles = StyleSheet.create({
   },
   chatList: {
     flex: 1,
+  },
+  chatListContent: {
     padding: 10,
+  },
+  inputContainer: {
+    padding: 2,
+    backgroundColor: Colors.primary,
+  },
+  textInput: {
+    backgroundColor: 'white',
   },
   header: {
     padding: 15,
