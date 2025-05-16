@@ -14,6 +14,7 @@ import { Avatar, Button, Card, Title, Paragraph, Searchbar, Text as PaperText } 
 
 import { PaperProvider } from 'react-native-paper';
 
+// Search bar component
 const ClassSearchBar = () => {
     const [searchQuery, setSearchQuery] = React.useState('');
   
@@ -24,8 +25,9 @@ const ClassSearchBar = () => {
         value={searchQuery}
       />
     );
-  };
+};
 
+// Header component
 const ClassHeader = () => {
     return (
         <View style={styles.header}>
@@ -34,11 +36,13 @@ const ClassHeader = () => {
     );
 };
 
+// Folder icon component
 const LeftContent = props => <Avatar.Icon {...props} icon="folder" />
 
+// Class item component
 const ClassItem = ({ title, subtitle, numStudents }) => {
     return (
-    <Card>
+    <Card style={styles.card}>
         <Card.Title title={title} subtitle={subtitle} left={LeftContent} />
         <Card.Content>
             <PaperText variant="bodyMedium">Number of Students: {numStudents}</PaperText>
@@ -50,36 +54,17 @@ const ClassItem = ({ title, subtitle, numStudents }) => {
     );
 };
 
-// Feature grid item component
-const FeatureItem = ({ title, AnimatedIcon, onPress }) => {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? 'dark' : 'light';
-  
-  return (
-    <TouchableOpacity 
-      style={[
-        styles.featureItem, 
-        { backgroundColor: Colors[theme].cardBackground }
-      ]} 
-      onPress={onPress}
-    >
-      <AnimatedIcon color={Colors.primary} />
-      <Text style={styles.featureTitle}>{title}</Text>
-    </TouchableOpacity>
-  );
-};
-
-export default function ClassScreenTwo({ navigation }) {
+// Class screen
+export default function ClassScreen({ navigation }) {
     const colorScheme = useColorScheme();
     const theme = colorScheme === 'dark' ? 'dark' : 'light';
     
     // Features data with animated components
     const classes = [
-      { id: 1, title: "CS 106B", Professor: "John Doe", NumStudents: 45 },
-      { id: 2, title: "Math 51", Professor: "Jane Smith", NumStudents: 30 },
-      { id: 3, title: "English 91", Professor: "Alice Johnson", NumStudents: 25 },
-      { id: 4, title: "Dorm Classes", Professor: "Bob Brown", NumStudents: 10 },
-      { id: 5, title: "Marketplace", Professor: "Charlie Davis", NumStudents: 15 },
+      { id: 1, title: "CS 278", Professor: "Professor Michael Bernstein", NumStudents: 45 },
+      { id: 2, title: "CS 109", Professor: "Professor Jerry Cain", NumStudents: 30 },
+      { id: 3, title: "English 91", Professor: "Professor John Evans", NumStudents: 25 },
+      { id: 4, title: "CS 103", Professor: "Professor Cynthia Bailey", NumStudents: 45 },
     ];
   
     // Render grid of features
@@ -88,8 +73,8 @@ export default function ClassScreenTwo({ navigation }) {
         <ClassItem
           key={feature.id}
           title={feature.title}
-          Professor={feature.Professor}
-          NumStudents={feature.NumStudents}
+          subtitle={feature.Professor}
+          numStudents={feature.NumStudents}
           //onPress={() => {
             //           console.log(`Pressed ${feature.title}`);
             //           if (feature.title === "Chats") {
@@ -121,10 +106,10 @@ export default function ClassScreenTwo({ navigation }) {
   return (
     // put in safe view
     <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
-      <ScrollView>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
         <ClassHeader />
         <ClassSearchBar />
-        <View>{renderClasses()}</View>
+        <View style={styles.classesContainer}>{renderClasses()}</View>
       </ScrollView>
     </View>
   );
@@ -133,6 +118,12 @@ export default function ClassScreenTwo({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  classesContainer: {
+    paddingBottom: 20,
   },
   header: {
     padding: 15,
@@ -144,72 +135,8 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 24,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "white",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "rgba(255, 255, 255, 0.8)",
-    marginTop: 5,
-  },
-  classesContainer: {
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-  },
-  featuresContainer: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 20,
-  },
-  classItem: {
-    aspectRatio: 1,
-    borderRadius: 12,
-    padding: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
-    width: "100%", // Reverted back to "100%" to make cards take up the whole space
-  },
-  classTitle: {
-    marginTop: 12,
-    textAlign: "center",
-    fontWeight: "500",
-    color: "white",
-  },
-  iconContainer: {
-    width: 50,
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  button: {
-    backgroundColor: '#2196F3',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginVertical: 10,
-    minWidth: 150,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  welcomeCard: {
-    margin: 16,
-    elevation: 4,
+  card: {
+    marginHorizontal: 16,
+    marginVertical: 8,
   },
 });
