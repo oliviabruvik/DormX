@@ -1,39 +1,42 @@
-// Modern darker dorm life color palette
-const tintColorLight = "#6C63FF"; // Deep purple/indigo
-const tintColorDark = "#8F88FF"; // Lighter purple for dark mode
+const tintColorLight = "#FF6B3C"; // Bright orange-coral
+const tintColorDark = "#FF8B61";  // Soft sunset orange
 
 export default {
-  // Base colors
-  primary: "#7B5AFF", // Deep purple/indigo
-  secondary: "#626988", // Muted slate
-  success: "#2BD9A8", // Teal
-  info: "#00C9FF", // Bright blue
-  warning: "#FF8F6B", // Coral
-  danger: "#FF5E93", // Pink
-  
-  // Neutrals
-  light: "#2C2C3E", // Dark blue-gray (light mode background)
-  dark: "#13131A", // Near black (dark mode background)
-  
-  // Light mode (actually darker theme)
+  // Core theme colors
+  primary: "#FF5C2A",        // Vivid tangerine
+  secondary: "#FF944D",      // Warm apricot
+  success: "#FFB84C",        // Golden honey
+  info: "#FFA686",           // Soft clay-peach
+  warning: "#FFD166",        // Vibrant sunshine
+  danger: "#FF4D5B",         // Warm cherry red
+
+  // Neutrals for structure
+  light: "#FFF5ED",          // Bright cream
+  dark: "#1F130E",           // Espresso brown
+
+  // Light mode
   light: {
-    text: "#FFFFFF", // White text
-    background: "#2C2C3E", // Dark blue-gray
+    text: "#3B1E14",               // Deep coffee brown
+    background: "#FFF1E8",         // Light peach base
     tint: tintColorLight,
-    tabIconDefault: "#7E7E95", // Muted purple-gray
+    tabIconDefault: "#C86B45",     // Muted clay
     tabIconSelected: tintColorLight,
-    cardBackground: "#3C3C50", // Slightly lighter than background
-    borderColor: "#484860", // Medium gray with purple undertone
+    cardBackground: "#FFDAC7",     // Soft apricot card
+    borderColor: "#FFBFA6",        // Peach outline
+    mutedText: "#9C6652",
+    placeholder: "#C49785",
   },
-  
-  // Dark mode (even darker)
+
+  // Dark mode
   dark: {
-    text: "#FFFFFF", // White
-    background: "#2D2B46", // Near black
+    text: "#FFFFFF",
+    background: "#2A150F",         // Dark terracotta
     tint: tintColorDark,
-    tabIconDefault: "#7E7E95", // Muted purple-gray
+    tabIconDefault: "#FF9E7A",
     tabIconSelected: tintColorDark,
-    cardBackground: "#23232E", // Very dark gray
-    borderColor: "#303045", // Dark border
+    cardBackground: "#3D1E15",     // Cocoa backdrop
+    borderColor: "#6B392A",        // Burnt sienna
+    mutedText: "#D79E8D",
+    placeholder: "#A67160",
   },
 };

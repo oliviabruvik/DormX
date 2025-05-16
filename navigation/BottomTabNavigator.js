@@ -28,7 +28,7 @@ export default function BottomTabNavigator() {
         tabBarInactiveTintColor: Colors[theme]?.tabIconDefault,
         tabBarStyle: {
           backgroundColor: Colors[theme]?.cardBackground,
-          borderTopColor: "rgba(0, 0, 0, 0.3)",
+          borderTopColor: "#E7E9FF",
           borderTopWidth: 1,
           paddingBottom: 9,
           paddingTop: 5,

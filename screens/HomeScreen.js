@@ -9,20 +9,21 @@ import { Text, View } from "../components/Themed";
 import Svg, { Rect, Circle, Path } from "react-native-svg";
 import Colors from "../constants/Colors";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { LinearGradient } from 'expo-linear-gradient';
 
-const ChatIcon = () => (
+const ChatIcon = ({ color }) => (
   <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
-    <Path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z" stroke="#7B5AFF" strokeWidth={4} />
-    <Path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" stroke="#7B5AFF" strokeWidth={2} />
+    <Path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z" stroke={color} strokeWidth={4} />
+    <Path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" stroke={color} strokeWidth={2} />
   </Svg>
 );
 
-const GalleryIcon = () => (
+const GalleryIcon = ({ color }) => (
   <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
-    <Path d="M18 22H4a2 2 0 0 1-2-2V6" stroke="#7B5AFF" strokeWidth={2} />
-    <Path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18" stroke="#7B5AFF" strokeWidth={4} />
-    <Circle cx="12" cy="8" r="2" fill="#7B5AFF" />
-    <Rect width="16" height="16" x="6" y="2" rx="2" stroke="#7B5AFF" strokeWidth={2} />
+    <Path d="M18 22H4a2 2 0 0 1-2-2V6" stroke={color} strokeWidth={2} />
+    <Path d="m22 13-1.296-1.296a2.41 2.41 0 0 0-3.408 0L11 18" stroke={color} strokeWidth={4} />
+    <Circle cx="12" cy="8" r="2" fill={color} />
+    <Rect width="16" height="16" x="6" y="2" rx="2" stroke={color} strokeWidth={2} />
   </Svg>
 );
 
@@ -141,10 +142,13 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: Colors[theme].background }]}>
-      <View style={[styles.header, { backgroundColor: Colors.primary }]}>
+      <LinearGradient
+        colors={["#FF7143", "#FF9E6A"]}
+        style={styles.header}
+      >
         <Text style={styles.title}>DormX</Text>
         <Text style={styles.subtitle}>Your Dorm Life Companion</Text>
-      </View>
+      </LinearGradient>
       <ScrollView contentContainerStyle={styles.featuresContainer}>
         {renderFeatures()}
       </ScrollView>
@@ -157,25 +161,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    padding: 24,
+    // backgroundColor: "#FFD9C3", // soft warm peach
+    paddingTop: 30,
+    paddingBottom: 32,
+    paddingHorizontal: 20,
     alignItems: "center",
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    elevation: 4,
     marginBottom: 20,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
-    
   },
+  
   title: {
-    fontSize: 30,
+    fontSize: 34,
     fontWeight: "800",
-    color: "white",
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
+    color: "#FFFFFF",
   },
   subtitle: {
     fontSize: 16,
-    fontWeight: "400",
-    color: "rgba(255, 255, 255, 0.75)",
-    marginTop: 6,
+    fontWeight: "500",
+    color: "rgba(198, 72, 99, 0.8)",
+    marginTop: 4,
   },
+  
   featuresContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -201,12 +213,15 @@ const styles = StyleSheet.create({
     
   },
   featureTitle: {
-    marginTop: 10,
-    fontSize: 14,
-    fontWeight: "500",
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: "600",
+    letterSpacing: 0.3,
     textAlign: "center",
-    color: "#DCD6FF",
+    color: "#B6543D", // Warm terracotta tone
   },
+  
+  
   iconContainer: {
     marginBottom: 12, // adds visual separation from text    
     width: 50,
