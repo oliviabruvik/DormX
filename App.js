@@ -1,70 +1,81 @@
-// App.js - Modified to bypass authentication
+// App.js - Updated with Supabase authentication
 import React from 'react';
 import {
   StyleSheet,
   View,
   Text,
-  Platform,
+  ActivityIndicator,
   LogBox,
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import BottomTabNavigator from './navigation/BottomTabNavigator'; // Import your existing navigator
-import { SafeAreaProvider } from 'react-native-safe-area-context'; // Import SafeAreaProvider
+import BottomTabNavigator from './navigation/BottomTabNavigator';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PaperProvider } from 'react-native-paper';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import AuthScreen from './screens/AuthScreen'; // We'll create this
 
 // Display logs in-app
 LogBox.ignoreAllLogs(false);
-LogBox.ignoreLogs(['specific warning to ignore']);  // Optional
+LogBox.ignoreLogs(['specific warning to ignore']);
 
-// In your components, add more console.log statements
-console.log('App starting - Authentication bypassed');
+console.log('App starting with Supabase authentication');
 
-// AuthContext for sharing auth info with deeper components if needed later
-import { createContext } from 'react';
-export const AuthContext = createContext(null);
+// Loading component
+const LoadingScreen = () => (
+  <View style={styles.loadingContainer}>
+    <ActivityIndicator size="large" color="#7B5AFF" />
+    <Text style={styles.loadingText}>Loading DormX...</Text>
+  </View>
+);
 
-// Main App component
+// Main navigation component that checks auth state
+const AppNavigator = () => {
+  const { user, loading, initialized, isLoggedIn } = useAuth();
+
+  console.log('Auth state:', { user: !!user, loading, initialized, isLoggedIn });
+
+  // Show loading screen while initializing
+  if (!initialized || loading) {
+    return <LoadingScreen />;
+  }
+
+  // Show auth screen if not logged in
+  if (!isLoggedIn) {
+    return <AuthScreen />;
+  }
+
+  // Show main app if logged in
+  return (
+    <NavigationContainer>
+      <BottomTabNavigator />
+    </NavigationContainer>
+  );
+};
+
+// Root App component
 export default function App() {
-  // Mock auth data to simulate a logged-in user
-  const mockAuth = {
-    isLoggedIn: true,  // Always true to bypass login
-    isLoading: false,
-    userInfo: {
-      name: 'Bichael Mernstein',
-      email: 'bim@gmail.com',
-      // Add any other user properties your app expects
-    },
-    signIn: () => console.log('Sign in bypassed'),
-    signOut: () => console.log('Sign out bypassed'),
-  };
-
-  console.log("App rendering with bypassed authentication");
-
-  // Directly show the main app with navigation
   return (
     <PaperProvider>
-    <SafeAreaProvider>
-      <AuthContext.Provider value={mockAuth}>
-        <NavigationContainer>
-            <BottomTabNavigator />
-        </NavigationContainer>
-      </AuthContext.Provider>
-    </SafeAreaProvider>
+      <SafeAreaProvider>
+        <AuthProvider>
+          <AppNavigator />
+        </AuthProvider>
+      </SafeAreaProvider>
     </PaperProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  loadingContainer: {
     flex: 1,
-  },
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-    padding: 20,
-  },
-  centerContent: {
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#7B5AFF',
   },
 });

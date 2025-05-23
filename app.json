@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "My App",
-    "slug": "my-app-nav",
+    "name": "DormX",
+    "slug": "dormx",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "scheme": "dormx",
     "owner": "reneedw",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -23,9 +23,25 @@
     "ios": {
       "supportsTablet": true,
       "supportsMultipleScreens": true,
-      "bundleIdentifier": "com.reneedw.myapp",
+      "bundleIdentifier": "com.reneedw.dormx",
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSExceptionDomains": {
+            "supabase.co": {
+              "NSExceptionAllowsInsecureHTTPLoads": true,
+              "NSExceptionMinimumTLSVersion": "1.0",
+              "NSIncludesSubdomains": true
+            },
+            "localhost": {
+              "NSExceptionAllowsInsecureHTTPLoads": true,
+              "NSExceptionMinimumTLSVersion": "1.0"
+            }
+          }
+        }
       }
     },
     "android": {
@@ -33,13 +49,15 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.reneedw.myapp",
+      "package": "com.reneedw.dormx",
       "googleServicesFile": "./google-services.json",
       "supportsMultipleScreens": true,
       "permissions": [
         "INTERNET",
-        "INTERNET"
-      ]
+        "ACCESS_NETWORK_STATE"
+      ],
+      "usesCleartextTraffic": true,
+      "networkSecurityConfig": "./network_security_config.xml"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"

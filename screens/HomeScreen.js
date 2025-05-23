@@ -4,12 +4,14 @@ import {
   ScrollView,
   Pressable,
   useColorScheme,
+  Alert,
 } from "react-native";
 import { Text, View } from "../components/Themed";
 import Svg, { Rect, Circle, Path } from "react-native-svg";
 import Colors from "../constants/Colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '../context/AuthContext'; // Import the real auth context
 
 const ChatIcon = ({ color }) => (
   <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
@@ -27,10 +29,7 @@ const GalleryIcon = ({ color }) => (
   </Svg>
 );
 
-
-
 const CalendarIcon = ({ color }) => (
-  // learn:     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar-days-icon lucide-calendar-days"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
   <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
     <Path d="M8 2v4" stroke={color} strokeWidth={2} />
     <Path d="M16 2v4" stroke={color} strokeWidth={2} />
@@ -46,7 +45,6 @@ const CalendarIcon = ({ color }) => (
 );
 
 const ClassesIcon = ({ color }) => (
-  // learn: <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-school-icon lucide-school"><path d="M14 22v-4a2 2 0 1 0-4 0v4"/><path d="m18 10 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7.382a1 1 0 0 1 .553-.894L6 10"/><path d="M18 5v17"/><path d="m4 6 7.106-3.553a2 2 0 0 1 1.788 0L20 6"/><path d="M6 5v17"/><circle cx="12" cy="9" r="2"/></svg>
   <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
     <Path d="M14 22v-4a2 2 0 1 0-4 0v4" stroke={color} strokeWidth={2} />
     <Path d="m18 10 3.447 1.724a1 1 0 0 1 .553.894V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7.382a1 1 0 0 1 .553-.894L6 10" stroke={color} strokeWidth={2} />
@@ -57,19 +55,10 @@ const ClassesIcon = ({ color }) => (
   </Svg>
 );
 
-const MarketplaceIcon = ({ color }) => (
-  <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-    <Rect x="10" y="10" width="30" height="30" rx="15" fill={color} />
-    <Path d="M20 15L30 25L20 35" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-  </Svg>
-);
-
-const ResourcesIcon = ({ color }) => (
-  <Svg width="50" height="50" viewBox="0 0 50 50" fill="none">
-    <Rect x="10" y="15" width="30" height="25" rx="3" fill={color} />
-    <Rect x="15" y="10" width="20" height="7" rx="2" fill={color} opacity={0.7} />
-    <Rect x="15" y="25" width="20" height="3" rx="1.5" fill="#FFFFFF" />
-    <Rect x="15" y="32" width="20" height="3" rx="1.5" fill="#FFFFFF" />
+const ProfileIcon = ({ color }) => (
+  <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
+    <Path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke={color} strokeWidth={2} />
+    <Circle cx="12" cy="7" r="4" stroke={color} strokeWidth={2} />
   </Svg>
 );
 
@@ -103,15 +92,35 @@ const FeatureItem = ({ title, Icon, onPress }) => {
 export default function HomeScreen({ navigation }) {
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? "dark" : "light";
+  const { userInfo, signOut } = useAuth(); // Get real user info and signOut function
 
   const features = [
     { id: 1, title: "Chats", Icon: ChatIcon },
     { id: 2, title: "Gallery", Icon: GalleryIcon },
     { id: 3, title: "Calendar", Icon: CalendarIcon },
     { id: 4, title: "Dorm Classes", Icon: ClassesIcon },
-    // { id: 5, title: "Marketplace", Icon: MarketplaceIcon },
-    // { id: 6, title: "Resources", Icon: ResourcesIcon },
+    { id: 5, title: "Profile", Icon: ProfileIcon }, // Add profile option
   ];
+
+  const handleProfilePress = () => {
+    Alert.alert(
+      "Profile Options",
+      `Logged in as: ${userInfo?.email || 'Unknown'}`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Sign Out", 
+          style: "destructive",
+          onPress: async () => {
+            const result = await signOut();
+            if (result.error) {
+              Alert.alert("Error", "Failed to sign out");
+            }
+          }
+        },
+      ]
+    );
+  };
 
   const renderFeatures = () => {
     return features.map((feature) => (
@@ -123,21 +132,10 @@ export default function HomeScreen({ navigation }) {
           if (feature.title === "Chats") navigation.navigate("ChannelsScreen");
           if (feature.title === "Gallery") navigation.navigate("GalleryScreen");
           if (feature.title === "Dorm Classes") navigation.navigate("ClassScreen");
+          if (feature.title === "Profile") handleProfilePress();
         }}
       />
     ));
-  };
-
-  // Chat press handler
-  const handleChatPress = () => {
-    console.log('Pressed Chats');
-    navigation.navigate('ChannelsScreen');
-  };
-
-  // Chat press handler
-  const handleGalleryPress = () => {
-    console.log('Pressed Gallery');
-    navigation.navigate('GalleryScreen');
   };
 
   return (
@@ -147,7 +145,7 @@ export default function HomeScreen({ navigation }) {
         style={styles.header}
       >
         <Text style={styles.title}>DormX</Text>
-        <Text style={styles.subtitle}>Your Dorm Life Companion</Text>
+        <Text style={styles.subtitle}>Welcome back, {userInfo?.name || 'Student'}!</Text>
       </LinearGradient>
       <ScrollView contentContainerStyle={styles.featuresContainer}>
         {renderFeatures()}
@@ -161,7 +159,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    // backgroundColor: "#FFD9C3", // soft warm peach
     paddingTop: 30,
     paddingBottom: 32,
     paddingHorizontal: 20,
@@ -195,7 +192,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingTop: 10,
     paddingBottom: 40,
-    rowGap: 24, // better vertical spacing
+    rowGap: 24,
   },
   
   featureItem: {
@@ -210,7 +207,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 6,
     elevation: 6,
-    
   },
   featureTitle: {
     marginTop: 12,
@@ -221,15 +217,12 @@ const styles = StyleSheet.create({
     color: "rgba(240, 213, 220, 0.9)",
   },
   
-  
   iconContainer: {
-    marginBottom: 12, // adds visual separation from text    
+    marginBottom: 12,
     width: 50,
     height: 50,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "transparent",
   },
-  // Icon: { size: 440 } // bump up size slightly
-
 });
