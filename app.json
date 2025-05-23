@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "dormx",
-    "owner": "reneedw",
+    "owner": "yousefanees",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -66,13 +66,15 @@
       "expo-font",
       "expo-asset",
       "expo-web-browser",
-      ["@react-native-google-signin/google-signin"]
+      [
+        "@react-native-google-signin/google-signin"
+      ]
     ],
+    "runtimeVersion": "1.0.0",
     "extra": {
       "eas": {
-        "projectId": "b88df7bc-2589-413b-8b2c-f3eab6ac6d41"
+        "projectId": "930206f6-b94f-418d-9d4b-371cb284044d"
       }
-    },
-    "runtimeVersion": "1.0.0"
+    }
   }
 }

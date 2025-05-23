@@ -15,6 +15,23 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
 
+// screens/AuthScreen.js
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '../context/AuthContext';
+
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -22,6 +39,9 @@ export default function AuthScreen() {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+
+  // Check if we're in simulator for development
+  const isSimulator = __DEV__ && Platform.OS === 'ios';
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -41,18 +61,28 @@ export default function AuthScreen() {
       
       if (isSignUp) {
         result = await signUp(email, password, { name });
-        if (result.error) {
+        if (result.error && !result.data) {
           Alert.alert('Sign Up Error', result.error.message);
         } else {
-          Alert.alert(
-            'Sign Up Successful', 
-            'Please check your email to verify your account.'
-          );
+          if (isSimulator && result.data) {
+            Alert.alert(
+              'Development Mode', 
+              'Signed up successfully in simulator mode!'
+            );
+          } else {
+            Alert.alert(
+              'Sign Up Successful', 
+              'Please check your email to verify your account.'
+            );
+          }
         }
       } else {
         result = await signIn(email, password);
-        if (result.error) {
+        if (result.error && !result.data) {
           Alert.alert('Sign In Error', result.error.message);
+        } else if (isSimulator && result.data) {
+          // Don't show alert for successful signin in simulator, just let it proceed
+          console.log('🔧 DEV: Simulator signin successful');
         }
       }
     } catch (error) {
@@ -86,6 +116,14 @@ export default function AuthScreen() {
           </LinearGradient>
 
           <View style={styles.formContainer}>
+            {isSimulator && (
+              <View style={styles.devModeIndicator}>
+                <Text style={styles.devModeText}>
+                  🔧 Simulator Mode - Network errors will be handled gracefully
+                </Text>
+              </View>
+            )}
+            
             <Text style={styles.formTitle}>
               {isSignUp ? 'Create Account' : 'Welcome Back'}
             </Text>
@@ -259,6 +297,20 @@ const styles = StyleSheet.create({
   toggleText: {
     color: '#7B5AFF',
     fontSize: 16,
+    fontWeight: '500',
+  },
+  devModeIndicator: {
+    backgroundColor: '#FFF3CD',
+    borderColor: '#FFEAA7',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  devModeText: {
+    color: '#856404',
+    fontSize: 12,
+    textAlign: 'center',
     fontWeight: '500',
   },
 });
