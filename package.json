@@ -29,7 +29,7 @@
     "lucide-react": "^0.510.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
-    "react-native": "0.79.1",
+    "react-native": "0.79.2",
     "react-native-calendars": "^1.1312.0",
     "react-native-crypto": "^2.2.0",
     "react-native-gesture-handler": "~2.24.0",

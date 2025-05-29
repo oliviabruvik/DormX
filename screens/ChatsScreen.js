@@ -1,51 +1,138 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, useColorScheme, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, useColorScheme, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import Colors from '../constants/Colors';
 import { Avatar, Button, Card, Title, Paragraph, Searchbar, TextInput, Text as PaperText } from 'react-native-paper';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
+import { createdAt } from 'expo-updates';
 
 export default function ChatsScreen({ navigation, route}) {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
   const scrollViewRef = useRef(null);
 
+  const { user } = useAuth();
+
   const { channelName = 'General' } = route.params || {};
 
-  // Header component
-  const ChatsHeader = () => {
-    return (
-        <View style={styles.header}>
-            <PaperText style={styles.headerText}>My Chats</PaperText>
-        </View>
-    );
+  // Sample chat data (you would replace this with real data)
+  const [loading, setLoading] = useState(false);
+  const [chats, setChats] = useState([]);
+
+  const loadChats = async() => {
+    try {
+      console.log('Loading chats for channel:', channelName);
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('chats')
+        .select('*')
+        .eq('channel_name', channelName)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error loading chats:', error);
+        Alert.alert('Error', 'Failed to load chats');
+        return;
+      }
+
+      console.log('Loaded chats:', data);
+      setChats(data || []);
+    } catch (error) {
+      console.error('Unexpected error loading chats:', error);
+      Alert.alert('Error', 'Failed to load chats');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Function to add a new message
+  const addMessage = async (messageText) => {
+    if (!messageText.trim()) return;
+    if (!user) {
+      Alert.alert('Error', 'You must be logged in to send messages!');
+      return;
+    }
+
+    try {
+      console.log('Sending message:', messageText);
+
+      const newMessage = {
+        created_by: user.id,
+        user_id: user.id,
+        user_name: user.user_metadata?.name || user.email?.split('@')[0] || 'You',
+        channel_name: channelName,
+        message: messageText.trim()
+      };
+
+    const { data, error } = await supabase
+      .from('chats')
+      .insert([newMessage])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error sending message:', error)
+      Alert.alert('Error', 'Failed to send message');
+      return;
+    }
+
+    console.log('Message sent successfully:', data);
+    
+    setChats(prevChats => [...prevChats, data]);
+    
+    // Scroll to bottom after adding message
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        scrollViewRef.current.scrollToEnd({ animated: true });
+      }
+    }, 100);
+
+  } catch (error) {
+    console.error('Unexpected error sending message:', error);
+    Alert.alert('Error, Failed to send message');
+    }
   };
 
   // Text input component
   const TextInputComponent = () => {
-    const [text, setText] = React.useState("");
+    const [text, setText] = useState("");
   
+    const handleSend = () => {
+      if (text.trim()) {
+        addMessage(text);
+        setText(""); // Clear input after sending
+      }
+    };
+
     return (
       <View style={styles.inputContainer}>
-        <TextInput
-          label="New message..."
-          value={text}
-          onChangeText={text => setText(text)}
-          autoFocus={true}
-          style={styles.textInput}
-        />
+        <View style={styles.inputRow}>
+          <TextInput
+            label="New message..."
+            value={text}
+            onChangeText={setText}
+            autoFocus={false}
+            style={styles.textInput}
+            onSubmitEditing={handleSend}
+            multiline={false}
+          />
+          <Button 
+            mode="contained" 
+            onPress={handleSend}
+            disabled={!text.trim()}
+            style={styles.sendButton}
+          >
+            Send
+          </Button>
+        </View>
       </View>
     );
   };
-  
-  // Sample chat data (you would replace this with real data)
-  const chats = [
-    { id: 1, name: 'Olivia Beyer Bruvik', lastMessage: 'Reminder: Floor meeting tonight at 8pm in the common room', time: '10:30 AM' },
-    { id: 2, name: 'Yousef AbuHashem', lastMessage: 'Can someone cover my duty shift this Saturday? Family emergency', time: 'Monday' },
-    { id: 3, name: 'Renee White', lastMessage: 'Just did room checks - all good on 3rd floor', time: 'Two Days Ago' },
-    { id: 4, name: 'Olivia Beyer Bruvik', lastMessage: 'Heads up: maintenance coming tomorrow to fix the washing machines', time: 'Sunday' },
-    { id: 5, name: 'Leslie Jin', lastMessage: 'Need help with a resident situation on 2nd floor', time: 'Yesterday' },
-    { id: 6, name: 'Leslie Jin', lastMessage: 'Updated duty schedule posted in the RA office', time: 'Last Week' },
-    { id: 7, name: 'Yousef AbuHashem', lastMessage: 'Fire alarm test scheduled for next Tuesday at 2pm', time: 'Last Week' }
-  ];
+
+  useEffect(() => {
+    loadChats();
+  }, [channelName]);
 
   // Scroll to bottom when component mounts
   useEffect(() => {
@@ -62,33 +149,33 @@ export default function ChatsScreen({ navigation, route}) {
       style={[styles.container, { backgroundColor: Colors[theme].background }]}
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
     >   
+
       <ScrollView 
         ref={scrollViewRef}
         style={styles.chatList}
         contentContainerStyle={styles.chatListContent}
       >
-        {/* <ChatsHeader /> */}
         {chats.map(chat => (
           <View 
             key={chat.id} 
             style={[styles.chatItem, { backgroundColor: Colors[theme].cardBackground }]}
           >
             <View style={styles.chatAvatar}>
-              <Text style={styles.avatarText}>{chat.name.charAt(0)}</Text>
+              <Text style={styles.avatarText}>{chat.user_name.charAt(0)}</Text>
             </View>
             <View style={[styles.chatContent, { backgroundColor: 'transparent' }]}>
               <View style={[styles.chatHeader, { backgroundColor: 'transparent' }]}>
                 <Text style={styles.chatName}
                             numberOfLines={1}
                             ellipsizeMode="tail">
-                            {chat.name}</Text>
-                <Text style={styles.chatTime}>{chat.time} </Text>
+                            {chat.user_name}</Text>
+                <Text style={styles.chatTime}>{chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown time'} </Text>
               </View>
               <Text 
                 style={styles.chatMessage}
                 ellipsizeMode="tail"
               >
-                {chat.lastMessage || "No messages yet"}
+                {chat.message || "No messages yet"}
               </Text>
             </View>
           </View>

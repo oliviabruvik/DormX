@@ -15,7 +15,7 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/b88df7bc-2589-413b-8b2c-f3eab6ac6d41"
+      "url": "https://u.expo.dev/930206f6-b94f-418d-9d4b-371cb284044d"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -54,6 +54,8 @@
       "supportsMultipleScreens": true,
       "permissions": [
         "INTERNET",
+        "ACCESS_NETWORK_STATE",
+        "INTERNET",
         "ACCESS_NETWORK_STATE"
       ],
       "usesCleartextTraffic": true,
@@ -70,7 +72,9 @@
         "@react-native-google-signin/google-signin"
       ]
     ],
-    "runtimeVersion": "1.0.0",
+    "runtimeVersion": {
+      "policy" : "appVersion"
+    },
     "extra": {
       "eas": {
         "projectId": "930206f6-b94f-418d-9d4b-371cb284044d"
