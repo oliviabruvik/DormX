@@ -1,38 +1,62 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, useColorScheme, TouchableOpacity } from 'react-native';
+import React, { use, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, useColorScheme, TouchableOpacity, Alert } from 'react-native';
 import Colors from '../constants/Colors';
 import { Avatar, Button, Card, Title, Paragraph, Searchbar, Text as PaperText } from 'react-native-paper';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 export default function ChannelsScreen({ navigation }) {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
+  const { user } = useAuth();
 
-  // Header component
-  const ChannelsHeader = () => {
-    return (
-        <View style={styles.header}>
-            <PaperText style={styles.headerText}>My Channels</PaperText>
-        </View>
-    );
-  };
-  // Sample chat data (you would replace this with real data)
-  const channels = [
-    { id: 1, name: 'Resident Assistants'},
-    { id: 2, name: 'Floor 1'},
-    { id: 3, name: 'Floor 2'},
-    { id: 4, name: 'Floor 3'},
-    { id: 5, name: 'Dorm Committee'},
-    { id: 6, name: 'Events'},
-    { id: 7, name: 'Announcements'},
-    { id: 8, name: 'General'},
-    { id: 9, name: 'Lockouts'}
-  ];
+  const [channels, setChannels] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const loadChannels = async () => {
+    try {
+      console.log('Loading channels');
+      setLoading(true);
+      
+      const { data, error } = await supabase
+        .from('channels')
+          .select(`
+          id,
+          name,
+          is_private,
+          created_by,
+          created_at,
+          chat_members!inner(user_id)
+        `)
+        .eq('chat_members.user_id', user.id)
+        .order('name', {ascending: true});
+
+      if (error) {
+        console.error('Error loading channels:', error);
+        Alert.alert('Error', 'Failed to load channels');
+        return;
+      }
+
+      console.log('Loaded channels:', data);
+      setChannels(data || []);
+    } catch (error) {
+      console.error('Unexpected error loading channels:', error)
+      Alert.alert('Error', 'Failed to load chats');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Chat press handler
   const handleChatPress = (channelName) => {
     console.log('Pressed', channelName);
     navigation.navigate('ChatsScreen', { channelName});
     }; 
+
+  useEffect(() => {
+    loadChannels();
+  }, []);
+
 
   const renderFeatures = () => {
     return channels.map((channel) => (
@@ -60,7 +84,6 @@ export default function ChannelsScreen({ navigation }) {
     // put in safe view
     <View style={[styles.container, { backgroundColor: Colors[theme].background }]}>
       <ScrollView>
-        <ChannelsHeader />
         <View style={styles.featuresContainer}>{renderFeatures()}</View>
       </ScrollView>
     </View>

@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 
 export default function AuthScreen() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -22,6 +23,61 @@ export default function AuthScreen() {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn, signUp } = useAuth();
+
+  const autoJoinDefaultChannels = async (userId) => {
+    if (!userId) return;
+
+    try {
+      console.log('Auto-joining user to default channels');
+
+      const defaultChannelNames = ['General', 'Announcements', 'Events'];
+
+      const { data : defaultChannels, error} = await supabase
+        .from('channels')
+        .select('id, name')
+        .in('name', defaultChannelNames);
+
+      if (error || !defaultChannels) {
+        console.error('Error getting default channels:', error)
+        return;
+      }
+
+      const { data: existingMemberships } = await supabase
+        .from('chat_members')
+        .select('channel_id')
+        .eq('user_id', userId);
+
+      const existingChannelIds = existingMemberships?.map(m => m.channel_id) || [];
+
+      const channelsToJoin = defaultChannels.filter(
+        channel => !existingChannelIds.includes(channel.id)
+      );
+
+      if (channelsToJoin.length === 0) {
+        console.log('User is already in all default channels');
+        return
+      }
+
+
+      const membershipsToAdd = channelsToJoin.map(channel => ({
+        user_id: userId,
+        channel_id: channel.id,
+        joined_at: new Date().toISOString()
+      }));
+
+      const { error: joinError } = await supabase
+        .from('chat_members')
+        .insert(membershipsToAdd);
+
+      if (joinError) {
+        console.error('Error auto-joining channels:', joinError);
+      } else {
+        console.log('Succesffuly auto-joined defualt channels');
+      }
+    } catch (error) {
+      console.error('Error in auto-join:', error)
+    }
+  };
 
   const handleAuth = async () => {
     if (!email || !password) {
@@ -44,6 +100,9 @@ export default function AuthScreen() {
         if (result.error) {
           Alert.alert('Sign Up Error', result.error.message);
         } else {
+          if (result.data?.user?.id) {
+            await autoJoinDefaultChannels(result.data.user.id);
+          }
           Alert.alert(
             'Sign Up Successful', 
             'Please check your email to verify your account.'
