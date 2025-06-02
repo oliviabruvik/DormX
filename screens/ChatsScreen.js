@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, useColorScheme, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, useColorScheme, KeyboardAvoidingView, Platform, Alert, Image } from 'react-native';
 import Colors from '../constants/Colors';
 import { Avatar, Button, Card, Title, Paragraph, Searchbar, TextInput, Text as PaperText } from 'react-native-paper';
 import { supabase } from '../lib/supabase';
@@ -11,7 +11,7 @@ export default function ChatsScreen({ navigation, route}) {
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
   const scrollViewRef = useRef(null);
 
-  const { user } = useAuth();
+  const { user, userProfile } = useAuth();
 
   const { channelName = 'General' } = route.params || {};
 
@@ -24,22 +24,41 @@ export default function ChatsScreen({ navigation, route}) {
       console.log('Loading chats for channel:', channelName);
       setLoading(true);
       
-      const { data, error } = await supabase
+      const { data: chatsData, error: chatsError } = await supabase
         .from('chats')
         .select('*')
         .eq('channel_name', channelName)
         .order('created_at', { ascending: true });
 
-      if (error) {
+      if (chatsError) {
         console.error('Error loading chats:', error);
         Alert.alert('Error', 'Failed to load chats');
         return;
       }
 
-      console.log('Loaded chats:', data);
-      setChats(data || []);
-    } catch (error) {
-      console.error('Unexpected error loading chats:', error);
+      if (chatsData && chatsData.length > 0) {
+        const userIds = [...new Set(chatsData.map(chat => chat.user_id))];
+        
+        const { data: profilesData, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, name, avatar_url')
+          .in('id', userIds);
+
+        if (profilesError) {
+          console.error('Error loading profiles:', profilesError);
+        }
+
+        // Combine chats with profile data
+        const chatsWithProfiles = chatsData.map(chat => ({
+          ...chat,
+          profiles: profilesData?.find(profile => profile.id === chat.user_id) || null
+        }));
+
+      console.log('Loaded chats:', chatsWithProfiles);
+      setChats(chatsWithProfiles || []);
+      }
+    } catch (chatsError) {
+      console.error('Unexpected error loading chats:', chatsError);
       Alert.alert('Error', 'Failed to load chats');
     } finally {
       setLoading(false);
@@ -49,7 +68,7 @@ export default function ChatsScreen({ navigation, route}) {
   // Function to add a new message
   const addMessage = async (messageText) => {
     if (!messageText.trim()) return;
-    if (!user) {
+    if (!user || !userProfile) {
       Alert.alert('Error', 'You must be logged in to send messages!');
       return;
     }
@@ -60,7 +79,7 @@ export default function ChatsScreen({ navigation, route}) {
       const newMessage = {
         created_by: user.id,
         user_id: user.id,
-        user_name: user.user_metadata?.name || user.email?.split('@')[0] || 'You',
+        user_name: userProfile.name || user.email?.split('@')[0] || 'You',
         channel_name: channelName,
         message: messageText.trim()
       };
@@ -78,8 +97,17 @@ export default function ChatsScreen({ navigation, route}) {
     }
 
     console.log('Message sent successfully:', data);
+
+    const newMessageWithProfile = {
+        ...data,
+        profiles: {
+          id: user.id,
+          name: userProfile.name,
+          avatar_url: userProfile.avatar_url
+        }
+      };
     
-    setChats(prevChats => [...prevChats, data]);
+    setChats(prevChats => [...prevChats, newMessageWithProfile]);
     
     // Scroll to bottom after adding message
     setTimeout(() => {
@@ -90,8 +118,38 @@ export default function ChatsScreen({ navigation, route}) {
 
   } catch (error) {
     console.error('Unexpected error sending message:', error);
-    Alert.alert('Error, Failed to send message');
+    Alert.alert('Error', 'Failed to send message');
     }
+  };
+
+    // Helper function to render avatar
+  const renderAvatar = (chat) => {
+    const profileData = chat.profiles || {};
+    const avatarUrl = profileData.avatar_url;
+    const userName = profileData.name || chat.user_name || 'Unknown';
+    
+    if (avatarUrl) {
+      return (
+        <Image 
+          source={{ uri: avatarUrl }} 
+          style={styles.avatarImage}
+          onError={() => {
+            console.log('Failed to load avatar image for:', userName);
+          }}
+        />
+      );
+    } else {
+      return (
+        <View style={styles.chatAvatar}>
+          <Text style={styles.avatarText}>{userName.charAt(0).toUpperCase()}</Text>
+        </View>
+      );
+    }
+  };
+
+  // Helper function to get display name
+  const getDisplayName = (chat) => {
+    return chat.profiles?.name || chat.user_name || 'Unknown User';
   };
 
   // Text input component
@@ -160,15 +218,13 @@ export default function ChatsScreen({ navigation, route}) {
             key={chat.id} 
             style={[styles.chatItem, { backgroundColor: Colors[theme].cardBackground }]}
           >
-            <View style={styles.chatAvatar}>
-              <Text style={styles.avatarText}>{chat.user_name.charAt(0)}</Text>
-            </View>
+            <View style={styles.avatarContainer}>{renderAvatar(chat)}</View>
             <View style={[styles.chatContent, { backgroundColor: 'transparent' }]}>
               <View style={[styles.chatHeader, { backgroundColor: 'transparent' }]}>
                 <Text style={styles.chatName}
                             numberOfLines={1}
                             ellipsizeMode="tail">
-                            {chat.user_name}</Text>
+                            {getDisplayName(chat)}</Text>
                 <Text style={styles.chatTime}>{chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown time'} </Text>
               </View>
               <Text 

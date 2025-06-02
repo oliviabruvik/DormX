@@ -539,8 +539,6 @@ export default function ChannelsScreen({ navigation }) {
               <TouchableOpacity onPress={() => setShowJoinModal(false)}>
                 <Text style={[styles.cancelButton, { color: Colors[theme].text }]}>Cancel</Text>
               </TouchableOpacity>
-
-              <Text style={[styles.modalTitle, { color: Colors[theme].text }]}>Join Channel</Text>
             </View>
 
             <ScrollView style={styles.modalForm}>
@@ -578,7 +576,6 @@ export default function ChannelsScreen({ navigation }) {
       <Modal
         visible={showChannelDetailsModal}
         animationType="slide"
-        transparent={true}
         presentationStyle='pageSheet'
         onRequestClose={() => setShowChannelDetailsModal(false)}
         >

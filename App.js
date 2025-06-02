@@ -30,17 +30,22 @@ const LoadingScreen = () => (
 
 // Main navigation component that checks auth state
 const AppNavigator = () => {
-  const { user, loading, initialized, isLoggedIn } = useAuth();
+  const { user, loading, initialized, isFullyAuthenticated } = useAuth();
 
-  console.log('Auth state:', { user: !!user, loading, initialized, isLoggedIn });
+  console.log('Auth state:', { user: !!user, isFullyAuthenticated, loading, initialized });
 
   // Show loading screen while initializing
   if (!initialized || loading) {
     return <LoadingScreen />;
   }
 
-  // Show auth screen if not logged in
-  if (!isLoggedIn) {
+  // // Show auth screen if not logged in
+  // if (!isLoggedIn) {
+  //   return <AuthScreen />;
+  // }
+
+  // Show auth screen if not fully authenticated (includes onboarding)
+  if (!isFullyAuthenticated) {
     return <AuthScreen />;
   }
 
