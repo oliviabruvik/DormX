@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, useColorScheme, KeyboardAvoidingView, Platform, Alert, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, useColorScheme, KeyboardAvoidingView, Platform, Alert, Image, TouchableOpacity, Modal } from 'react-native';
 import Colors from '../constants/Colors';
-import { Avatar, Button, Card, Title, Paragraph, Searchbar, TextInput, Text as PaperText } from 'react-native-paper';
+import { Avatar, Button, Card, Title, Paragraph, Searchbar, TextInput, Text as PaperText, Menu, Divider } from 'react-native-paper';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { createdAt } from 'expo-updates';
@@ -16,13 +16,15 @@ export default function ChatsScreen({ navigation, route}) {
   const { channelName = 'General' } = route.params || {};
 
   // Sample chat data (you would replace this with real data)
-  const [loading, setLoading] = useState(false);
   const [chats, setChats] = useState([]);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
+  const [editingMessage, setEditingMessage] = useState(null);
+  const [editText, setEditText] = useState('');
 
   const loadChats = async() => {
     try {
       console.log('Loading chats for channel:', channelName);
-      setLoading(true);
       
       const { data: chatsData, error: chatsError } = await supabase
         .from('chats')
@@ -31,7 +33,7 @@ export default function ChatsScreen({ navigation, route}) {
         .order('created_at', { ascending: true });
 
       if (chatsError) {
-        console.error('Error loading chats:', error);
+        console.error('Error loading chats:', chatsError);
         Alert.alert('Error', 'Failed to load chats');
         return;
       }
@@ -60,14 +62,14 @@ export default function ChatsScreen({ navigation, route}) {
     } catch (chatsError) {
       console.error('Unexpected error loading chats:', chatsError);
       Alert.alert('Error', 'Failed to load chats');
-    } finally {
-      setLoading(false);
     }
   }
 
   // Function to add a new message
   const addMessage = async (messageText) => {
-    if (!messageText.trim()) return;
+    if (!messageText.trim()) {
+      return;
+    }
     if (!user || !userProfile) {
       Alert.alert('Error', 'You must be logged in to send messages!');
       return;
@@ -84,43 +86,150 @@ export default function ChatsScreen({ navigation, route}) {
         message: messageText.trim()
       };
 
-    const { data, error } = await supabase
-      .from('chats')
-      .insert([newMessage])
-      .select()
-      .single();
+      const { data, error } = await supabase
+        .from('chats')
+        .insert([newMessage])
+        .select()
+        .single();
 
-    if (error) {
-      console.error('Error sending message:', error)
+      if (error) {
+        console.error('Error sending message:', error)
+        Alert.alert('Error', 'Failed to send message');
+        return;
+      }
+
+      console.log('Message sent successfully:', data);
+
+      const newMessageWithProfile = {
+          ...data,
+          profiles: {
+            id: user.id,
+            name: userProfile.name,
+            avatar_url: userProfile.avatar_url
+          }
+        };
+      
+      setChats(prevChats => [...prevChats, newMessageWithProfile]);
+      
+      // Scroll to bottom after adding message
+      setTimeout(() => {
+        if (scrollViewRef.current) {
+          scrollViewRef.current.scrollToEnd({ animated: true });
+        }
+      }, 100);
+
+    } catch (error) {
+      console.error('Unexpected error sending message:', error);
       Alert.alert('Error', 'Failed to send message');
+    }
+  };
+
+  const deleteMessage = async (messageId) => {
+    try {
+      const { error } = await supabase
+        .from('chats')
+        .delete()
+        .eq('id', messageId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deleting message:', error);
+        Alert.alert('Error', 'Failed to delete message');
+        return;
+      }
+
+      setChats(prevChats => prevChats.filter(chat => chat.id !== messageId));
+      setShowMenu(false);
+      setSelectedMessage(null);
+    } catch (error) {
+      console.error('Unexpected error deleting message:', error);
+      Alert.alert('Error', 'Failed to delete message');
+    }
+  };
+
+  const editMessage = async (messageId, newText) => {
+    if (!newText.trim()) {
+      Alert.alert('Error', 'Message cannot be empty');
       return;
     }
 
-    console.log('Message sent successfully:', data);
+    try {
+      const { data, error } = await supabase
+        .from('chats')
+        .update({
+          message: newText.trim(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', messageId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
 
-    const newMessageWithProfile = {
-        ...data,
-        profiles: {
-          id: user.id,
-          name: userProfile.name,
-          avatar_url: userProfile.avatar_url
-        }
-      };
-    
-    setChats(prevChats => [...prevChats, newMessageWithProfile]);
-    
-    // Scroll to bottom after adding message
-    setTimeout(() => {
-      if (scrollViewRef.current) {
-        scrollViewRef.current.scrollToEnd({ animated: true });
+      if (error) {
+        console.error('Error editing message:', error);
+        Alert.alert('Error', 'Failed to edit message');
+        return;
       }
-    }, 100);
 
-  } catch (error) {
-    console.error('Unexpected error sending message:', error);
-    Alert.alert('Error', 'Failed to send message');
+      setChats(prevChats =>
+        prevChats.map(chat => 
+          chat.id === messageId 
+            ? { ...chat, message: newText.trim(), updated_at: data.updated_at }
+            : chat
+        )
+      );
+
+      setEditingMessage(null);
+      setEditText('');
+    } catch (error) {
+      console.error('Unexpected error editing message:', error);
+      Alert.alert('Error', 'Failed to edit message');
     }
   };
+
+  const handleLongPress = (chat) => {
+    if (chat.user_id === user?.id) {
+      setSelectedMessage(chat);
+      setShowMenu(true);
+    }
+  };
+
+  const handleDelete = () => {
+    if (selectedMessage) {
+      Alert.alert(
+        'Delete Message',
+        'Are you sure you wnat to delete this message?',
+        [
+          { text: 'Cancel', style: 'cancel'},
+          {
+            text: 'Delete',
+            style: 'destructive',
+            onPress: () => deleteMessage(selectedMessage.id)
+          }
+        ]
+      );
+    }
+  };
+
+  const handleEdit = () => {
+    if (selectedMessage) {
+      setEditingMessage(selectedMessage.id);
+      setEditText(selectedMessage.message);
+      setShowMenu(false);
+      setSelectedMessage(null);
+    }
+  }
+
+  const saveEdit = () => {
+    if (editingMessage && editText.trim()) {
+      editMessage(editingMessage, editText);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditingMessage(null);
+    setEditText('');
+  }
 
     // Helper function to render avatar
   const renderAvatar = (chat) => {
@@ -205,7 +314,7 @@ export default function ChatsScreen({ navigation, route}) {
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={[styles.container, { backgroundColor: Colors[theme].background }]}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 125}
     >   
 
       <ScrollView 
@@ -214,10 +323,18 @@ export default function ChatsScreen({ navigation, route}) {
         contentContainerStyle={styles.chatListContent}
       >
         {chats.map(chat => (
-          <View 
-            key={chat.id} 
-            style={[styles.chatItem, { backgroundColor: Colors[theme].cardBackground }]}
+          <TouchableOpacity
+            key={chat.id}
+            onLongPress={() => handleLongPress(chat)}
+            activeOpacity={0.7}
           >
+            <View 
+              style={[
+                styles.chatItem, 
+                { backgroundColor: Colors[theme].cardBackground },
+                chat.user_id === user?.id && styles.ownMessage
+              ]}
+            >
             <View style={styles.avatarContainer}>{renderAvatar(chat)}</View>
             <View style={[styles.chatContent, { backgroundColor: 'transparent' }]}>
               <View style={[styles.chatHeader, { backgroundColor: 'transparent' }]}>
@@ -225,18 +342,77 @@ export default function ChatsScreen({ navigation, route}) {
                             numberOfLines={1}
                             ellipsizeMode="tail">
                             {getDisplayName(chat)}</Text>
-                <Text style={styles.chatTime}>{chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown time'} </Text>
+                <Text style={styles.chatTime}>
+                  {chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown time'} 
+                  {chat.updated_at && chat.updated_at !== chat.created_at && (<Text style={styles.editedText}> (edited)</Text>)}
+                </Text>
               </View>
-              <Text 
-                style={styles.chatMessage}
-                ellipsizeMode="tail"
-              >
-                {chat.message || "No messages yet"}
-              </Text>
+              {editingMessage === chat.id ? (
+                  <View style={styles.editContainer}>
+                    <TextInput
+                      value={editText}
+                      onChangeText={setEditText}
+                      style={styles.editInput}
+                      multiline
+                      autoFocus
+                    />
+                    <View style={styles.editButtons}>
+                      <Button 
+                        mode="outlined" 
+                        onPress={cancelEdit}
+                        style={styles.cancelButton}
+                        compact
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        mode="contained" 
+                        onPress={saveEdit}
+                        style={styles.saveButton}
+                        compact
+                      >
+                        Save
+                      </Button>
+                    </View>
+                  </View>
+                ) : (
+                  <Text 
+                    style={styles.chatMessage}
+                    ellipsizeMode="tail"
+                  >
+                    {chat.message || "No messages yet"}
+                  </Text>
+                )}
             </View>
           </View>
+        </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* Context Menu Modal */}
+      <Modal
+        visible={showMenu}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowMenu(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setShowMenu(false)}
+        >
+          <View style={styles.contextMenu}>
+            <TouchableOpacity style={styles.menuItem} onPress={handleEdit}>
+              <Text style={styles.menuItemText}>Edit Message</Text>
+            </TouchableOpacity>
+            <Divider />
+            <TouchableOpacity style={styles.menuItem} onPress={handleDelete}>
+              <Text style={[styles.menuItemText, styles.deleteText]}>Delete Message</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
       <TextInputComponent />
     </KeyboardAvoidingView>
   );
@@ -251,13 +427,6 @@ const styles = StyleSheet.create({
   },
   chatListContent: {
     padding: 10,
-  },
-  inputContainer: {
-    padding: 2,
-    backgroundColor: Colors.primary,
-  },
-  textInput: {
-    backgroundColor: 'white',
   },
   header: {
     padding: 15,
@@ -320,5 +489,56 @@ const styles = StyleSheet.create({
   chatMessage: {
     fontSize: 14,
     color: 'white',
+  },
+  editContainer: {
+    marginTop: 5,
+  },
+  editInput: {
+    backgroundColor: 'white',
+    marginBottom: 10,
+    fontSize: 14,
+  },
+  editButtons: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+  cancelButton: {
+    backgroundColor: 'transparent',
+    borderColor: '#666',
+  },
+  saveButton: {
+    backgroundColor: Colors.primary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contextMenu: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    paddingVertical: 8,
+    minWidth: 150,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  menuItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  menuItemText: {
+    fontSize: 16,
+    color: '#333',
+  },
+  deleteText: {
+    color: '#d32f2f',
   },
 });
