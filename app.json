@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "My App",
-    "slug": "my-app-nav",
+    "name": "DormX",
+    "slug": "dormx",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
-    "owner": "reneedw",
+    "scheme": "dormx",
+    "owner": "278peeps",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
@@ -15,7 +15,7 @@
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
-      "url": "https://u.expo.dev/b88df7bc-2589-413b-8b2c-f3eab6ac6d41"
+      "url": "https://u.expo.dev/930206f6-b94f-418d-9d4b-371cb284044d"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -23,9 +23,25 @@
     "ios": {
       "supportsTablet": true,
       "supportsMultipleScreens": true,
-      "bundleIdentifier": "com.reneedw.myapp",
+      "bundleIdentifier": "com.reneedw.dormx",
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSExceptionDomains": {
+            "supabase.co": {
+              "NSExceptionAllowsInsecureHTTPLoads": true,
+              "NSExceptionMinimumTLSVersion": "1.0",
+              "NSIncludesSubdomains": true
+            },
+            "localhost": {
+              "NSExceptionAllowsInsecureHTTPLoads": true,
+              "NSExceptionMinimumTLSVersion": "1.0"
+            }
+          }
+        }
       }
     },
     "android": {
@@ -33,13 +49,17 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.reneedw.myapp",
+      "package": "com.reneedw.dormx",
       "googleServicesFile": "./google-services.json",
       "supportsMultipleScreens": true,
       "permissions": [
         "INTERNET",
-        "INTERNET"
-      ]
+        "ACCESS_NETWORK_STATE",
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ],
+      "usesCleartextTraffic": true,
+      "networkSecurityConfig": "./network_security_config.xml"
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -48,13 +68,17 @@
       "expo-font",
       "expo-asset",
       "expo-web-browser",
-      ["@react-native-google-signin/google-signin"]
+      [
+        "@react-native-google-signin/google-signin"
+      ]
     ],
+    "runtimeVersion": {
+      "policy" : "appVersion"
+    },
     "extra": {
       "eas": {
-        "projectId": "b88df7bc-2589-413b-8b2c-f3eab6ac6d41"
+        "projectId": "930206f6-b94f-418d-9d4b-371cb284044d"
       }
-    },
-    "runtimeVersion": "1.0.0"
+    }
   }
 }

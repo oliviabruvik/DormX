@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:792953911828:android:c9cafd7b64602940d74501",
         "android_client_info": {
-          "package_name": "com.reneedw.myapp"
+          "package_name": "com.reneedw.dormx"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "792953911828-3s1nc97d3ucn2qs6valkef7mgdi6inne.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.reneedw.myapp",
+            "package_name": "com.reneedw.dormx",
             "certificate_hash": "dfc83f29b24ca5e7849a98a242c618599e006a2e"
           }
         },
