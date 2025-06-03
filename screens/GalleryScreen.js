@@ -18,12 +18,12 @@ export default function GalleryScreen() {
   
     // Albums with name of event and a cover image
     const images = [
-        { id: 1, title: "Event 1", source: require('../assets/images/example_image.jpeg')},
-        { id: 2, title: "Event 2", source: require('../assets/images/example_image.jpeg')},
-        { id: 3, title: "Event 3 with a long name to see what happens"},
-        { id: 4, title: "Event 4", source: require('../assets/images/example_image.jpeg')},
-        { id: 5, title: "Event 5", source: require('../assets/images/example_image.jpeg')},
-        { id: 6, title: "Event 6"},
+        { id: 1, title: "Bim's Birthday", source: require('../assets/images/event1.jpg')},
+        { id: 2, title: "Yosemite trip", source: require('../assets/images/event2.jpg')},
+        { id: 3, title: "Topgolf", source: require('../assets/images/event3.jpg')},
+        { id: 4, title: "Half moon bay trip", source: require('../assets/images/event4.jpg')},
+        { id: 5, title: "Frisbee tournament", source: require('../assets/images/event7.jpeg')},
+        { id: 6, title: "Monterey trip", source: require('../assets/images/event9.jpg')},
       ];
 
       // Calculate layout dimensions based on screen width
