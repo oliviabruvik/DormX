@@ -251,7 +251,7 @@ export default function AuthScreen() {
         } else if (result.data?.user?.id) {
             console.log('Signup successful! User ID:', result.data.user.id);
         } else {
-          console.error('❌ Signup succeeded but no user data:', result);
+          console.error('Signup succeeded but no user data:', result);
           Alert.alert('Error', 'Account creation succeeded but user data is missing. Please try signing in.');
         }
       } else {
@@ -274,13 +274,6 @@ export default function AuthScreen() {
     setPassword('');
     setName('');
   };
-
-  // console.log('📊 Current state:', {
-  //   showOnboardingModal,
-  //   newUserId,
-  //   displayName,
-  //   isSignUp
-  // });
 
   // Show onboarding modal if user needs onboarding
   if (needsOnboarding) {

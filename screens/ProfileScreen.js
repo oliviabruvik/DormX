@@ -1,5 +1,5 @@
 // ProfileScreen.js - Fixed version
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
@@ -9,16 +9,195 @@ import {
   ScrollView,
   useColorScheme,
   Alert,
+  RefreshControl,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext'; // Import useAuth hook instead
+import { supabase } from '../lib/supabase';
 import Colors from '../constants/Colors';
 
 export default function ProfileScreen() {
   // Use the useAuth hook to get user info and signOut function
-  const { userInfo, signOut, loading } = useAuth();
+  const { user, userProfile, signOut, loading } = useAuth();
+  const [refreshing, setRefreshing] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? 'dark' : 'light';
+
+  const [editName, setEditName] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editDormName, setEditDormName] = useState('');
+  const [editRoomNumber, setEditRoomNumber] = useState('');
+  const [editYearInSchool, setEditYearInSchool] = useState('');
+  const [editMajor, setEditMajor] = useState('');
+  const [newProfileImage, setNewProfileImage] = useState(null);
+
+  const loadProfileData = async () => {
+    if (!user.id) {
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error loading profile:', error);
+        return;
+      }
+
+      setProfileData(data);
+    } catch (error) {
+      console.error('Unexpected error loading profile:', error)
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadProfileData();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    loadProfileData();
+  }, [user?.id]);
+
+
+  const startEditing = () => {
+    const profile = profileData || userProfile;
+    setEditName(profile?.name || '');
+    setEditBio(profile?.bio || '');
+    setEditDormName(profile?.dorm_name || '');
+    setEditRoomNumber(profile?.room_number || '');
+    setEditYearInSchool(profile?.year_in_school || '');
+    setEditMajor(profile?.major || '');
+    setNewProfileImage(null);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+    setNewProfileImage(null);
+  };
+
+  // Image picker
+  const pickImage = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert('Permission Required', 'Cannot upload an image without granting photo library access');
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaType: ImagePicker.MediaType.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+        base64: false,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        setNewProfileImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
+    }
+  };
+
+    // Upload image to Supabase storage
+  const uploadProfileImage = async (imageUri) => {
+    if (!imageUri || !user?.id) return null;
+
+    try {
+      const fileExt = imageUri.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = `profile-images/${fileName}`;
+
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+
+      const { data, error } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, blob, {
+          contentType: `image/${fileExt}`,
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Error uploading image:', error);
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error in uploadProfileImage:', error);
+      return null;
+    }
+  };
+
+  const saveChanges = async () => {
+    if (!editName.trim()) {
+      Alert.alert('Error', 'Please enter your name');
+      return;
+    }
+
+    try {
+      let avatarUrl = displayProfile?.avatar_url;
+
+      // Upload new image if selected
+      if (newProfileImage) {
+        const uploadedUrl = await uploadProfileImage(newProfileImage);
+        if (uploadedUrl) {
+          avatarUrl = uploadedUrl;
+        }
+      }
+
+      const updateData = {
+        name: editName.trim(),
+        bio: editBio.trim(),
+        dorm_name: editDormName.trim(),
+        room_number: editRoomNumber.trim(),
+        year_in_school: editYearInSchool.trim(),
+        major: editMajor.trim(),
+        avatar_url: avatarUrl,
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase
+        .from('profiles')
+        .update(updateData)
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('Error updating profile:', error);
+        Alert.alert('Error', 'Failed to update profile. Please try again.');
+        return;
+      }
+
+      // Refresh local data
+      await loadProfileData();
+      setIsEditing(false);
+      setNewProfileImage(null);
+
+      Alert.alert('Success', 'Profile updated successfully!');
+    } catch (error) {
+      console.error('Unexpected error updating profile:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    }
+  };
+
   
   // Handle sign out with confirmation
   const handleSignOut = () => {
@@ -43,7 +222,10 @@ export default function ProfileScreen() {
       ]
     );
   };
-  
+
+  // Use profileData if available, fallback to userProfile
+  const displayProfile = profileData || userProfile;
+
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: Colors[theme].background }]}>
@@ -56,35 +238,243 @@ export default function ProfileScreen() {
     );
   }
 
-  if (!userInfo) {
+  if (!user || !displayProfile) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: Colors[theme].background }]}>
         <View style={styles.loadingContainer}>
           <Text style={[styles.errorText, { color: Colors[theme].text }]}>
             Unable to load profile information
           </Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={loadProfileData}
+          >
+            <Text style={styles.retryText}>Retry</Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
+  // Helper function to render avatar
+  const renderAvatar = () => {
+    const imageSource = newProfileImage || displayProfile.avatar_url;
+
+    if (imageSource) {
+      return (
+        <Image
+          source={{ uri: imageSource }}
+          style={styles.profilePic}
+          onError={() => {
+            console.log('Failed to load profile avatar');
+          }}
+        />
+      );
+    } else {
+      const initials = displayProfile.name ? 
+        displayProfile.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase() : 
+        user.email?.charAt(0).toUpperCase() || 'U';
+      
+      return (
+        <View style={[styles.profilePic, styles.avatarPlaceholder]}>
+          <Text style={styles.avatarText}>{initials}</Text>
+        </View>
+      );
+    }
+  };
+
+  // Format date helper
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not set';
+    return new Date(dateString).toLocaleDateString();
+  };
+
+
+  const renderEditableField = (label, value, editValue, onChangeText, placeholder, multiline = false, maxLength = 50) => (
+    <View style={styles.infoRow}>
+      <Text style={[styles.infoLabel, { color: Colors[theme].text }]}>
+        {label}
+      </Text>
+      {isEditing ? (
+        <View style={styles.editFieldContainer}>
+          <TextInput
+            style={[
+              styles.editInput,
+              multiline && styles.editInputMultiline,
+              { 
+                backgroundColor: Colors[theme].cardBackground,
+                color: Colors[theme].text,
+                borderColor: Colors[theme].border || '#ddd'
+              }
+            ]}
+            value={editValue}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor={Colors[theme].tabIconDefault}
+            multiline={multiline}
+            maxLength={maxLength}
+            autoCapitalize={multiline ? 'sentences' : 'words'}
+          />
+          {maxLength && (
+            <Text style={[styles.charCount, { color: Colors[theme].tabIconDefault }]}>
+              {editValue.length}/{maxLength}
+            </Text>
+          )}
+        </View>
+      ) : (
+        <Text style={[styles.infoValue, { color: Colors[theme].text }]}>
+          {value || 'Not set'}
+        </Text>
+      )}
+    </View>
+  );
+  
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: Colors[theme].background }]}>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Profile Header */}
         <View style={[styles.profileHeader, { backgroundColor: Colors[theme].cardBackground }]}>
-          <Image
-            source={{
-              uri: userInfo.avatar_url || 'https://via.placeholder.com/120x120/7B5AFF/FFFFFF?text=' + (userInfo.name?.charAt(0) || 'U')
-            }}
-            style={styles.profilePic}
-          />
-          <Text style={[styles.profileName, { color: Colors[theme].text }]}>
-            {userInfo.name || 'User'}
+          <TouchableOpacity 
+              style={styles.avatarContainer}
+              onPress={isEditing ? pickImage : undefined}
+            >
+              {renderAvatar()}
+          </TouchableOpacity>
+
+          {isEditing ? (
+              <View style={styles.nameEditContainer}>
+                <TextInput
+                  style={[styles.nameEditInput, { 
+                    color: Colors[theme].text,
+                    borderColor: Colors[theme].border || '#ddd'
+                  }]}
+                  value={editName}
+                  onChangeText={setEditName}
+                  placeholder="Enter your name"
+                  placeholderTextColor={Colors[theme].tabIconDefault}
+                  textAlign="center"
+                  maxLength={50}
+                />
+              </View>
+            ) : (
+              <Text style={[styles.profileName, { color: Colors[theme].text }]}>
+                {displayProfile.name || 'No name set'}
+              </Text>
+            )}
+          
+          {isEditing ? (
+              <View style={styles.editActions}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={cancelEditing}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.saveButton]}
+                  onPress={saveChanges}
+                >
+                  <Text style={styles.saveButtonText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={startEditing}
+              >
+                <Text style={styles.editButtonText}>Edit Profile</Text>
+              </TouchableOpacity>
+            )}
+        </View>
+
+        {/* General Information Section */}
+        <View style={styles.sectionContainer}>
+          <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+            General Information
           </Text>
-          <Text style={[styles.profileEmail, { color: Colors[theme].text }]}>
-            {userInfo.email}
+          <View style={[styles.infoCard, { backgroundColor: Colors[theme].cardBackground }]}>
+            {renderEditableField(
+                'Full Name', 
+                displayProfile.name, 
+                editName, 
+                setEditName, 
+                'Enter your full name'
+              )}
+            
+            <View style={styles.infoRow}>
+              <Text style={[styles.infoLabel, { color: Colors[theme].text }]}>
+                Email
+              </Text>
+              <Text style={[styles.infoValue, { color: Colors[theme].text }]}>
+                {user.email}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Personal Information Section */}
+        <View style={styles.sectionContainer}>
+          <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+            Personal Information
           </Text>
+          <View style={[styles.infoCard, { backgroundColor: Colors[theme].cardBackground }]}>
+            {renderEditableField(
+                'Dorm Name', 
+                displayProfile.dorm_name, 
+                editDormName, 
+                setEditDormName, 
+                'e.g., Smith Hall'
+              )}
+            
+            <View style={styles.infoRow}>
+              {renderEditableField(
+                'Room Number', 
+                displayProfile.room_number, 
+                editRoomNumber, 
+                setEditRoomNumber, 
+                'e.g., 205A',
+                false,
+                10
+              )}
+            </View>
+
+            <View style={styles.roleContainer}>
+              <Text style={[styles.infoLabel, { color: Colors[theme].text }]}>
+                User Type
+              </Text>
+              <Text style={[styles.infoValue, { color: Colors[theme].text }]}>
+                {displayProfile.is_ra ? 'Resident Assistant (RA)' : 'Resident'}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Academic Information Section */}
+        <View style={styles.sectionContainer}>
+          <Text style={[styles.sectionTitle, { color: Colors[theme].text }]}>
+            Academic Information
+          </Text>
+          <View style={[styles.infoCard, { backgroundColor: Colors[theme].cardBackground }]}>
+            {renderEditableField(
+                'Year in School', 
+                displayProfile.year_in_school, 
+                editYearInSchool, 
+                setEditYearInSchool, 
+                'e.g., Freshman, Sophomore'
+              )}
+
+            {renderEditableField(
+                'Major', 
+                displayProfile.major, 
+                editMajor, 
+                setEditMajor
+              )}
+          </View>
         </View>
         
         {/* Account Information Section */}
@@ -93,42 +483,29 @@ export default function ProfileScreen() {
             Account Information
           </Text>
           <View style={[styles.infoCard, { backgroundColor: Colors[theme].cardBackground }]}>
+            
             <View style={styles.infoRow}>
               <Text style={[styles.infoLabel, { color: Colors[theme].text }]}>
-                Name
+                Member Since
               </Text>
               <Text style={[styles.infoValue, { color: Colors[theme].text }]}>
-                {userInfo.name || 'Not set'}
-              </Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: Colors[theme].text }]}>
-                Email
-              </Text>
-              <Text style={[styles.infoValue, { color: Colors[theme].text }]}>
-                {userInfo.email}
-              </Text>
-            </View>
-            <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
-              <Text style={[styles.infoLabel, { color: Colors[theme].text }]}>
-                Account Type
-              </Text>
-              <Text style={[styles.infoValue, { color: Colors[theme].text }]}>
-                Supabase Account
+                {formatDate(displayProfile.created_at || user.created_at)}
               </Text>
             </View>
           </View>
         </View>
         
         {/* Actions Section */}
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.signOutButton}
-            onPress={handleSignOut}
-          >
-            <Text style={styles.signOutText}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
+        {!isEditing && (
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={styles.signOutButton}
+                onPress={handleSignOut}
+              >
+                <Text style={styles.signOutText}>Sign Out</Text>
+              </TouchableOpacity>
+            </View>
+          )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -153,6 +530,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     opacity: 0.7,
   },
+  retryButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   profileHeader: {
     alignItems: 'center',
     paddingVertical: 30,
@@ -174,16 +562,79 @@ const styles = StyleSheet.create({
     height: 120,
     borderRadius: 60,
     marginBottom: 16,
-    backgroundColor: '#7B5AFF',
+    backgroundColor: '#f0f0f0',
+  },
+  avatarPlaceholder: {
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarText: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: 'white',
   },
   profileName: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
+    textAlign: 'center',
   },
   profileEmail: {
     fontSize: 16,
     opacity: 0.8,
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  profileBio: {
+    fontSize: 14,
+    opacity: 0.7,
+    textAlign: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 20,
+    fontStyle: 'italic',
+  },
+  editActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  cancelButton: {
+    backgroundColor: '#666',
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  cancelButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  saveButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  saveButtonDisabled: {
+    opacity: 0.6,
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  editButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginTop: 8,
+  },
+  editButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: '600',
   },
   sectionContainer: {
     paddingHorizontal: 20,
@@ -209,6 +660,7 @@ const styles = StyleSheet.create({
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.05)',
@@ -216,10 +668,11 @@ const styles = StyleSheet.create({
   infoLabel: {
     fontSize: 16,
     fontWeight: '500',
+    flex: 1,
   },
   infoValue: {
     fontSize: 16,
-    flex: 1,
+    flex: 2,
     textAlign: 'right',
   },
   actions: {
@@ -241,9 +694,53 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
+  roleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flex: 2,
+  },
   signOutText: {
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+  },
+  editFieldContainer: {
+    flex: 2,
+    alignItems: 'flex-end',
+  },
+  editInput: {
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    fontSize: 16,
+    width: '100%',
+    textAlign: 'right',
+  },
+  editInputMultiline: {
+    height: 60,
+    textAlignVertical: 'top',
+  },
+  charCount: {
+    fontSize: 12,
+    marginTop: 2,
+    opacity: 0.7,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 2,
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  switchLabel: {
+    fontSize: 16,
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    flex: 2,
   },
 });

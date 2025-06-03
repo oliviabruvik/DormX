@@ -102,26 +102,6 @@ export default function HomeScreen({ navigation }) {
     { id: 5, title: "Profile", Icon: ProfileIcon }, // Add profile option
   ];
 
-  const handleProfilePress = () => {
-    Alert.alert(
-      "Profile Options",
-      `Logged in as: ${userInfo?.email || 'Unknown'}`,
-      [
-        { text: "Cancel", style: "cancel" },
-        { 
-          text: "Sign Out", 
-          style: "destructive",
-          onPress: async () => {
-            const result = await signOut();
-            if (result.error) {
-              Alert.alert("Error", "Failed to sign out");
-            }
-          }
-        },
-      ]
-    );
-  };
-
   const renderFeatures = () => {
     return features.map((feature) => (
       <FeatureItem
@@ -132,7 +112,7 @@ export default function HomeScreen({ navigation }) {
           if (feature.title === "Chats") navigation.navigate("ChannelsScreen");
           if (feature.title === "Gallery") navigation.navigate("GalleryScreen");
           if (feature.title === "Dorm Classes") navigation.navigate("ClassScreen");
-          if (feature.title === "Profile") handleProfilePress();
+          if (feature.title === "Profile") navigation.navigate('ProfileScreen');
         }}
       />
     ));
