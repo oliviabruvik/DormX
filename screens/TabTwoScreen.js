@@ -4,10 +4,9 @@ import Colors from '../constants/Colors';
 import { TextInput, Text as PaperText } from 'react-native-paper';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-// import { OPENAI_API_KEY } from '@env';
+import { OPENAI_API_KEY } from '@env';
 
 const GPT_MODEL = "gpt-4.1"
-const OPENAI_API_KEY = "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"
 
 // function to fetch user info from supabase
 async function fetchUserInfo(user) {
@@ -15,14 +14,14 @@ async function fetchUserInfo(user) {
   if (error) {
     console.error('Error fetching user info:', error);
   }
-  console.log('Fetched user info:', data);
+  console.log('Fetched user info for user:', user.id);
   return data;
 }
 
 // function to fetch class id's that user is enrolled in from supabase
 async function fetchClassEnrollmentData(user) {
   const { data, error } = await supabase.from('class_enrollments').select('*').eq('user_id', user.id);
-  console.log('Fetched class enrollment data:', data);
+  console.log('Fetched class enrollment data for user:', user.id);
   
   // get class id's from data
   const classIds = data.map(item => item.class_id);
@@ -37,7 +36,7 @@ async function fetchClassEnrollmentData(user) {
 // function to fetch class data from supabase
 async function fetchClassData(classIds) {
   const { data, error } = await supabase.from('classes').select('*').in('id', classIds);
-  console.log('Fetched class data:', data);
+  console.log('Fetched class data for class ids:', classIds);
 
   // get class name, class description, class professor, class time, class location
   const relevantClassData = data.map(item => {
@@ -47,9 +46,26 @@ async function fetchClassData(classIds) {
       current_students: item.current_students,
     }
   });
-  console.log('Relevant class data:', relevantClassData);
+  console.log('Fetched relevant class data with instructor name and class');
   return relevantClassData;
 }
+
+// function to fetch channel_ids that user is enrolled in from supabase
+async function fetchChannelEnrollmentData(user) {
+  const { data, error } = await supabase.from('chat_members').select('*').eq('user_id', user.id);
+  console.log('Fetched channel enrollment data:', data);
+
+  // get channel id's from data
+  const channelIds = data.map(item => item.channel_id);
+  console.log('Channel IDs:', channelIds);
+
+  if (error) {
+    console.error('Error fetching channel enrollment data:', error);
+  }
+
+  return channelIds;
+}
+
 
 async function fetchChatResponse(userMessage, userData, classData) {
 
@@ -62,7 +78,7 @@ async function fetchChatResponse(userMessage, userData, classData) {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${OPENAI_API_KEY}`
+      'Authorization': `Bearer ${String(OPENAI_API_KEY)}`
     },
     body: JSON.stringify({
       model: GPT_MODEL, // or 'gpt-3.5-turbo'
