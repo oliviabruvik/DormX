@@ -37,3 +37,12 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# Native folders
+/ios/
+/android/
+
+# Environment variables
+.env
+.env.local
+.env.*.local

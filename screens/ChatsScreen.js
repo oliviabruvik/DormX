@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, useColorScheme, KeyboardAvoidingView, Platform, Alert, Image, TouchableOpacity, Modal } from 'react-native';
 import Colors from '../constants/Colors';
-import { Avatar, Button, Card, Title, Paragraph, Searchbar, TextInput, Text as PaperText, Menu, Divider } from 'react-native-paper';
+import { Avatar, Button, Card, Title, Paragraph, Searchbar, TextInput, Text as PaperText, Menu, Divider, IconButton } from 'react-native-paper';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { createdAt } from 'expo-updates';
@@ -50,14 +50,30 @@ export default function ChatsScreen({ navigation, route}) {
           console.error('Error loading profiles:', profilesError);
         }
 
+        const { data: flaggedChats, error: flaggedError } = await supabase
+          .from('flagged_chats')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (flaggedError) {
+          console.error('Error loading flagged chats:', flaggedError);
+        }
+
+        console.log('Flagged chats:', flaggedChats);
+
         // Combine chats with profile data
         const chatsWithProfiles = chatsData.map(chat => ({
           ...chat,
-          profiles: profilesData?.find(profile => profile.id === chat.user_id) || null
+          profiles: profilesData?.find(profile => profile.id === chat.user_id) || null,
+          flagged: flaggedChats?.some(flagged => flagged.chat_id === chat.id) || false,
+          deleted_at: flaggedChats?.find(flagged => flagged.chat_id === chat.id)?.deleted_at || null
         }));
 
-      console.log('Loaded chats:', chatsWithProfiles);
-      setChats(chatsWithProfiles || []);
+        // filter out deleted chats
+        const filteredChats = chatsWithProfiles.filter(chat => chat.deleted_at === null);
+
+        console.log('Loaded chats:', filteredChats);
+        setChats(filteredChats || []);
       }
     } catch (chatsError) {
       console.error('Unexpected error loading chats:', chatsError);
@@ -297,6 +313,107 @@ export default function ChatsScreen({ navigation, route}) {
     );
   };
 
+  const handleFlagMessage = async (chat) => {
+    try {
+      // Check if chat is already flagged by this user
+      if (chat.flagged) {
+        // If already flagged, unflag it
+        await handleUnflagMessage(chat);
+      } else {
+        // If not flagged, flag it
+        await handleAddFlag(chat);
+      }
+    } catch (error) {
+      console.error('Unexpected error handling flag:', error);
+      Alert.alert('Error', 'Failed to handle flag');
+    }
+  };
+
+  const handleAddFlag = async (chat) => {
+    try {
+      // Add chat to flagged_chats table
+      const { error: flagError } = await supabase
+        .from('flagged_chats')
+        .insert({
+          chat_id: chat.id,
+          user_id: user.id,
+          flagged_at: new Date().toISOString()
+        });
+
+      console.log('Adding flag... with user id:', user.id, 'and chat id:', chat.id);
+
+      if (flagError) {
+        console.error('Error flagging message:', flagError);
+        Alert.alert('Error', 'Failed to flag message');
+        return;
+      }
+
+      // Update local state
+      setChats(prevChats =>
+        prevChats.map(c => 
+          c.id === chat.id 
+            ? { ...c, flagged: true }
+            : c
+        )
+      );
+
+      Alert.alert('Success', 'Message flagged successfully');
+      console.log('Message flagged successfully');
+    } catch (error) {
+      console.error('Unexpected error adding flag:', error);
+      Alert.alert('Error', 'Failed to flag message');
+    }
+  };
+
+  const handleUnflagMessage = async (chat) => {
+    try {
+
+      // Remove from flagged_chats table
+      const { error: unflagError } = await supabase
+        .from('flagged_chats')
+        .delete()
+        .eq('chat_id', chat.id);
+        //.eq('user_id', user.id);
+
+      console.log('Unflagging message... with user id:', user.id, 'and chat id:', chat.id);
+
+      if (unflagError) {
+        console.error('Error unflagging message:', unflagError);
+        Alert.alert('Error', 'Failed to unflag message');
+        return;
+      }
+
+      // Update local state
+      setChats(prevChats =>
+        prevChats.map(c => 
+          c.id === chat.id 
+            ? { ...c, flagged: false }
+            : c
+        )
+      );
+
+      Alert.alert('Success', 'Message unflagged successfully');
+      console.log('Message unflagged successfully');
+    } catch (error) {
+      console.error('Unexpected error removing flag:', error);
+      Alert.alert('Error', 'Failed to unflag message');
+    }
+  };
+
+  // Update the flag icon to show filled or outlined based on whether the current user has flagged it
+  const renderFlagIcon = (chat) => {
+    const isFlagged = chat.flagged;
+    return (
+      <IconButton
+        icon={isFlagged ? "flag" : "flag-outline"}
+        size={16}
+        iconColor={isFlagged ? Colors.primary : Colors.secondary}
+        style={styles.flagIcon}
+        onPress={() => handleFlagMessage(chat)}
+      />
+    );
+  };
+
   useEffect(() => {
     loadChats();
   }, [channelName]);
@@ -342,10 +459,13 @@ export default function ChatsScreen({ navigation, route}) {
                             numberOfLines={1}
                             ellipsizeMode="tail">
                             {getDisplayName(chat)}</Text>
-                <Text style={styles.chatTime}>
-                  {chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown time'} 
-                  {chat.updated_at && chat.updated_at !== chat.created_at && (<Text style={styles.editedText}> (edited)</Text>)}
-                </Text>
+                <View style={styles.headerRight}>
+                  <Text style={styles.chatTime}>
+                    {chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown time'} 
+                    {chat.updated_at && chat.updated_at !== chat.created_at && (<Text style={styles.editedText}> (edited)</Text>)}
+                  </Text>
+                  {renderFlagIcon(chat)}
+                </View>
               </View>
               {editingMessage === chat.id ? (
                   <View style={styles.editContainer}>
@@ -540,5 +660,13 @@ const styles = StyleSheet.create({
   },
   deleteText: {
     color: '#d32f2f',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  flagIcon: {
+    margin: 0,
+    marginLeft: 4,
   },
 });
