@@ -52,8 +52,8 @@ export default function ChatsScreen({ navigation, route}) {
 
         const { data: flaggedChats, error: flaggedError } = await supabase
           .from('flagged_chats')
-          .select('*');
-          //.eq('user_id', user.id);
+          .select('*')
+          .eq('user_id', user.id);
 
         if (flaggedError) {
           console.error('Error loading flagged chats:', flaggedError);
@@ -65,11 +65,15 @@ export default function ChatsScreen({ navigation, route}) {
         const chatsWithProfiles = chatsData.map(chat => ({
           ...chat,
           profiles: profilesData?.find(profile => profile.id === chat.user_id) || null,
-          flagged: flaggedChats?.some(flagged => flagged.chat_id === chat.id) || false
+          flagged: flaggedChats?.some(flagged => flagged.chat_id === chat.id) || false,
+          deleted_at: flaggedChats?.find(flagged => flagged.chat_id === chat.id)?.deleted_at || null
         }));
 
-      console.log('Loaded chats:', chatsWithProfiles);
-      setChats(chatsWithProfiles || []);
+        // filter out deleted chats
+        const filteredChats = chatsWithProfiles.filter(chat => chat.deleted_at === null);
+
+        console.log('Loaded chats:', filteredChats);
+        setChats(filteredChats || []);
       }
     } catch (chatsError) {
       console.error('Unexpected error loading chats:', chatsError);
