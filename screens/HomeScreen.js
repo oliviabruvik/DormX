@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   ScrollView,
@@ -12,6 +12,7 @@ import Colors from "../constants/Colors";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '../context/AuthContext'; // Import the real auth context
+import { supabase } from '../lib/supabase';
 
 const ChatIcon = ({ color }) => (
   <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
@@ -62,6 +63,13 @@ const ProfileIcon = ({ color }) => (
   </Svg>
 );
 
+const ModerationIcon = ({ color }) => (
+  <Svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" marginBottom={15}>
+    <Path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke={color} strokeWidth={2} />
+    <Path d="M5 12h14" stroke={color} strokeWidth={2} />
+  </Svg>
+);
+
 // Feature grid item component
 const FeatureItem = ({ title, Icon, onPress }) => {
   const colorScheme = useColorScheme();
@@ -93,6 +101,28 @@ export default function HomeScreen({ navigation }) {
   const colorScheme = useColorScheme();
   const theme = colorScheme === "dark" ? "dark" : "light";
   const { userInfo, signOut } = useAuth(); // Get real user info and signOut function
+  const [isRA, setIsRA] = useState(false);
+
+  useEffect(() => {
+    const checkUserRole = async () => {
+      if (!userInfo?.id) return;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_ra')
+        .eq('id', userInfo.id)
+        .single();
+
+      if (error) {
+        console.error('Error checking user role:', error);
+        return;
+      }
+
+      setIsRA(data?.is_ra);
+    };
+
+    checkUserRole();
+  }, [userInfo]);
 
   const features = [
     { id: 1, title: "Chats", Icon: ChatIcon },
@@ -100,6 +130,7 @@ export default function HomeScreen({ navigation }) {
     { id: 3, title: "Calendar", Icon: CalendarIcon },
     { id: 4, title: "Dorm Classes", Icon: ClassesIcon },
     { id: 5, title: "Profile", Icon: ProfileIcon }, // Add profile option
+    ...(isRA ? [{ id: 6, title: "Moderation", Icon: ModerationIcon }] : []),
   ];
 
   const renderFeatures = () => {
@@ -113,6 +144,7 @@ export default function HomeScreen({ navigation }) {
           if (feature.title === "Gallery") navigation.navigate("GalleryScreen");
           if (feature.title === "Dorm Classes") navigation.navigate("ClassScreen");
           if (feature.title === "Profile") navigation.navigate('ProfileScreen');
+          if (feature.title === "Moderation") navigation.navigate("ModerationScreen");
         }}
       />
     ));

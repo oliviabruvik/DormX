@@ -11,6 +11,7 @@ import ChannelsScreen from "../screens/ChannelsScreen";
 import GalleryScreen from "../screens/GalleryScreen";
 import ProfileScreen from "../screens/ProfileScreen"; // Import the new ProfileScreen
 import ClassScreen from "../screens/ClassScreen";
+import ModerationScreen from "../screens/ModerationScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
 
@@ -129,6 +130,11 @@ function HomeNavigator() {
         name="ClassScreen" 
         component={ClassScreen}
         options={{ headerTitle: "Dorm Classes" }}
+      />
+      <HomeStack.Screen
+        name="ModerationScreen" 
+        component={ModerationScreen}
+        options={{ headerTitle: "Moderation" }}
       />
     </HomeStack.Navigator>
   );
