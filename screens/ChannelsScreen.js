@@ -30,6 +30,7 @@ export default function ChannelsScreen({ navigation }) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showChannelDetailsModal, setShowChannelDetailsModal] = useState(false);
+  const [showNormsModal, setShowNormsModal] = useState(false);
 
   const [availableChannels, setAvailableChannels] = useState([]);
   const [selectedChannelDetails, setSelectedChannelDetails] = useState(null);
@@ -39,6 +40,19 @@ export default function ChannelsScreen({ navigation }) {
   const [channelDescription, setChannelDescription] = useState('');
   const [isPrivate, setIsPrivate] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [agreedToNorms, setAgreedToNorms] = useState(false);
+
+  // Community norms content
+  const communityNorms = [
+    "🤝 Respect all community members and their perspectives",
+    "💬 Keep conversations relevant to the channel topic",
+    "🚫 No harassment, bullying, or discriminatory language",
+    "🔒 Respect privacy - don't share personal information without permission",
+    "📱 Use appropriate language suitable for a dorm community",
+    "🎯 Stay on topic and avoid excessive off-topic discussions",
+    "🤐 What happens in private channels stays private",
+    "🆘 Report any concerning behavior to RAs or moderators"
+  ];
 
   const handleCreateChannel = () => {
     console.log('Create new channel pressed');
@@ -51,6 +65,7 @@ export default function ChannelsScreen({ navigation }) {
     setIsPrivate(false);
     setSearchQuery('');
     setAvailableChannels([]);
+    setAgreedToNorms(false);
   }
 
   const handleCloseAllModals = () => {
@@ -58,6 +73,7 @@ export default function ChannelsScreen({ navigation }) {
     setShowCreateModal(false);
     setShowJoinModal(false);
     setShowChannelDetailsModal(false);
+    setShowNormsModal(false);
     setSelectedChannelDetails(null);
     resetForm();
   }
@@ -180,7 +196,7 @@ export default function ChannelsScreen({ navigation }) {
         return;
       }
 
-      Alert.alert('Success', `Successfully joined "${channelName}"!`);
+      Alert.alert('Success', `Successfully joined "${channelName}"! Remember to follow our community norms.`);
       handleCloseAllModals();
       loadChannels();
     } catch (error) {
@@ -207,6 +223,11 @@ export default function ChannelsScreen({ navigation }) {
 
     if (channelDescription.length > 200) {
       Alert.alert('Error', 'Channel description must be less than 200 characters');
+      return;
+    }
+
+    if (!agreedToNorms) {
+      Alert.alert('Community Norms Required', 'Please review and agree to our community norms before creating a channel.');
       return;
     }
 
@@ -244,31 +265,37 @@ export default function ChannelsScreen({ navigation }) {
         console.error('Error joining creator to channel:', memberError);
       }
 
-      Alert.alert('Success', `Channel "${channelName}" created successfully!`);
+      Alert.alert('Success', `Channel "${channelName}" created successfully! As the creator, please help maintain a positive community environment.`);
       handleCloseAllModals();
       loadChannels();
-
 
     } catch (error) {
       console.error('Unexpected error creating channel:', error);
       Alert.alert('Error', 'An unexpected error occurred');
     }
-
   }
 
   // Set up navigation header with plus button
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <TouchableOpacity 
-          style={[styles.plusButton, { backgroundColor: Colors.primary }]}
-          onPress={handleCreateChannel}
-        >
-          <Text style={styles.plusButtonText}>+</Text>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity 
+            style={[styles.infoButton, { backgroundColor: Colors[theme].text + '20' }]}
+            onPress={() => setShowNormsModal(true)}
+          >
+            <Text style={[styles.infoButtonText, { color: Colors[theme].text }]}>ℹ️</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.plusButton, { backgroundColor: Colors.primary }]}
+            onPress={handleCreateChannel}
+          >
+            <Text style={styles.plusButtonText}>+</Text>
+          </TouchableOpacity>
+        </View>
       ),
     });
-  }, [navigation]);
+  }, [navigation, theme]);
 
   const loadChannels = async () => {
     try {
@@ -307,16 +334,13 @@ export default function ChannelsScreen({ navigation }) {
     navigation.navigate('ChatsScreen', { channelName});
     }; 
 
-
   useEffect(() => {
     loadChannels();
   }, []);
 
-
   const filteredAvailableChannels = availableChannels.filter(channel =>
     channel.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
 
   const renderFeatures = () => {
     return channels.map((channel) => (
@@ -356,7 +380,6 @@ export default function ChannelsScreen({ navigation }) {
         style={[styles.availableChannelItem, {
           backgroundColor: Colors[theme].background,
           borderColor: Colors[theme].text + '30',
-          // color: Colors[theme].text
         }]}
         onPress={() => handleChannelNamePress(channel)}
         >
@@ -378,6 +401,52 @@ export default function ChannelsScreen({ navigation }) {
         <View style={styles.featuresContainer}>{renderFeatures()}</View>
       </ScrollView>
     
+      {/* Community Norms Modal */}
+      <Modal
+        visible={showNormsModal}
+        animationType="slide"
+        presentationStyle='pageSheet'
+        onRequestClose={() => setShowNormsModal(false)}
+      >
+        <SafeAreaView style={[styles.modalContainer, { backgroundColor: Colors[theme].background }]}>
+          <View style={[styles.modalHeader, {borderBottomColor: Colors[theme].text + '20' }]}>
+            <TouchableOpacity onPress={() => setShowNormsModal(false)}>
+              <Text style={[styles.cancelButton, { color: Colors[theme].text }]}>Close</Text>
+            </TouchableOpacity>
+            <Text style={[styles.modalTitle, { color: Colors[theme].text }]}>Community Norms</Text>
+            <View style={{ width: 60 }} />
+          </View>
+
+          <ScrollView style={styles.normsContent}>
+            <View style={styles.normsIntro}>
+              <Text style={[styles.normsTitle, { color: Colors[theme].text }]}>
+                Our Community Guidelines
+              </Text>
+              <Text style={[styles.normsSubtitle, { color: Colors[theme].text + '80' }]}>
+                These norms help create a positive and respectful environment for everyone in our dorm community.
+              </Text>
+            </View>
+
+            <View style={styles.normsList}>
+              {communityNorms.map((norm, index) => (
+                <View key={index} style={[styles.normItem, { borderLeftColor: Colors.primary }]}>
+                  <Text style={[styles.normText, { color: Colors[theme].text }]}>
+                    {norm}
+                  </Text>
+                </View>
+              ))}
+            </View>
+
+            <View style={[styles.normsFooter, { backgroundColor: Colors[theme].background }]}>
+              <Text style={[styles.normsFooterText, { color: Colors[theme].text + '60' }]}>
+                By participating in channels, you agree to follow these community norms. 
+                Violations may result in removal from channels or other moderation actions.
+              </Text>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
       <Modal
         visible={showOptionsModal}
         transparent={true}
@@ -434,13 +503,13 @@ export default function ChannelsScreen({ navigation }) {
               <Text style={[styles.modalTitle, { color: Colors[theme].text }]}>Create Channel</Text>
               <TouchableOpacity
                 onPress={handleSubmitChannel}
-                disabled={!channelName.trim()}
+                disabled={!channelName.trim() || !agreedToNorms}
               >
                 <Text style={[
                   styles.createButton,
                   { 
-                    color: !channelName.trim() ? '#999' : Colors.primary,
-                    opacity: !channelName.trim() ? 0.6 : 1
+                    color: (!channelName.trim() || !agreedToNorms) ? '#999' : Colors.primary,
+                    opacity: (!channelName.trim() || !agreedToNorms) ? 0.6 : 1
                   }
                 ]}>
                 Create
@@ -448,7 +517,7 @@ export default function ChannelsScreen({ navigation }) {
               </TouchableOpacity>
             </View>
 
-                        <ScrollView style={styles.modalForm}>
+            <ScrollView style={styles.modalForm}>
               <View style={styles.formGroup}>
                 <Text style={[styles.formLabel, { color: Colors[theme].text }]}>
                   Channel Name *
@@ -465,9 +534,7 @@ export default function ChannelsScreen({ navigation }) {
                   placeholderTextColor={Colors[theme].text + '60'}
                   maxLength={50}
                   autoFocus
-                >
-
-                </TextInput>
+                />
               </View>
 
               <View style={styles.formGroup}>
@@ -517,6 +584,43 @@ export default function ChannelsScreen({ navigation }) {
                   />
                 </View>
               </View>
+
+              {/* Community Norms Agreement */}
+              <View style={[styles.formGroup, styles.normsAgreement]}>
+                <View style={styles.normsHeader}>
+                  <Text style={[styles.formLabel, { color: Colors[theme].text, marginBottom: 8 }]}>
+                    Community Norms Agreement *
+                  </Text>
+                  <TouchableOpacity 
+                    onPress={() => setShowNormsModal(true)}
+                    style={styles.viewNormsButton}
+                  >
+                    <Text style={[styles.viewNormsText, { color: Colors.primary }]}>
+                      View Norms
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                
+                <TouchableOpacity 
+                  style={styles.agreementRow}
+                  onPress={() => setAgreedToNorms(!agreedToNorms)}
+                >
+                  <View style={[
+                    styles.checkbox, 
+                    { 
+                      borderColor: Colors[theme].text + '40',
+                      backgroundColor: agreedToNorms ? Colors.primary : 'transparent'
+                    }
+                  ]}>
+                    {agreedToNorms && (
+                      <Text style={styles.checkmark}>✓</Text>
+                    )}
+                  </View>
+                  <Text style={[styles.agreementText, { color: Colors[theme].text }]}>
+                    I agree to follow the community norms and help maintain a respectful environment
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </ScrollView>
 
           </KeyboardAvoidingView>
@@ -539,6 +643,15 @@ export default function ChannelsScreen({ navigation }) {
               <TouchableOpacity onPress={() => setShowJoinModal(false)}>
                 <Text style={[styles.cancelButton, { color: Colors[theme].text }]}>Cancel</Text>
               </TouchableOpacity>
+              <Text style={[styles.modalTitle, { color: Colors[theme].text }]}>Join Channel</Text>
+              <View style={{ width: 60 }} />
+            </View>
+
+            {/* Community reminder for joining */}
+            <View style={[styles.joinReminder, { backgroundColor: Colors.primary + '10', borderColor: Colors.primary + '30' }]}>
+              <Text style={[styles.joinReminderText, { color: Colors[theme].text }]}>
+                💡 Remember to follow our community norms when joining channels
+              </Text>
             </View>
 
             <ScrollView style={styles.modalForm}>
@@ -557,8 +670,7 @@ export default function ChannelsScreen({ navigation }) {
                   placeholder="Search for channels..."
                   placeholderTextColor={Colors[theme].text + '60'}
                   autoFocus
-                >
-                </TextInput>
+                />
               </View>
 
               <View style={styles.availableChannelsContainer}>
@@ -671,18 +783,133 @@ const styles = StyleSheet.create({
     color: 'white',
     flexShrink: 1,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  infoButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  infoButtonText: {
+    fontSize: 14,
+  },
   plusButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
   },
   plusButtonText: {
     color: 'white',
     fontSize: 20,
     fontWeight: "bold",
+  },
+  normsContent: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  normsIntro: {
+    paddingVertical: 20,
+  },
+  normsTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 8,
+  },
+  normsSubtitle: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  normsList: {
+    paddingBottom: 20,
+  },
+  normItem: {
+    paddingLeft: 16,
+    paddingVertical: 12,
+    marginBottom: 8,
+    borderLeftWidth: 3,
+    backgroundColor: 'rgba(123, 90, 255, 0.05)',
+    borderRadius: 8,
+  },
+  normText: {
+    fontSize: 15,
+    lineHeight: 20,
+  },
+  normsFooter: {
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(123, 90, 255, 0.2)',
+  },
+  normsFooterText: {
+    fontSize: 13,
+    lineHeight: 18,
+    fontStyle: 'italic',
+  },
+  joinReminder: {
+    margin: 20,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  joinReminderText: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  normsAgreement: {
+    backgroundColor: 'rgba(123, 90, 255, 0.05)',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(123, 90, 255, 0.2)',
+  },
+  normsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  viewNormsButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: 'rgba(123, 90, 255, 0.1)',
+  },
+  viewNormsText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  agreementRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    marginRight: 12,
+    marginTop: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  checkmark: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  agreementText: {
+    flex: 1,
+    fontSize: 14,
+    lineHeight: 20,
   },
   optionsOverlay: {
     flex: 1,
@@ -712,6 +939,7 @@ const styles = StyleSheet.create({
   },
   optionButton: {
     paddingHorizontal: 20,
+    paddingVertical: 12,
     borderRadius: 12,
     marginBottom: 12,
     alignItems: 'center',
@@ -731,6 +959,7 @@ const styles = StyleSheet.create({
   },
   cancelOptionButton: {
     paddingHorizontal: 20,
+    paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1,
@@ -761,6 +990,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  createButton: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
   modalForm: {
     flex: 1,
     paddingHorizontal: 20,
@@ -781,6 +1014,14 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     textAlignVertical: 'top',
+  },
+  descriptionInput: {
+    minHeight: 80,
+  },
+  characterCount: {
+    fontSize: 12,
+    textAlign: 'right',
+    marginTop: 4,
   },
   privacyRow: {
     flexDirection: 'row',
@@ -846,6 +1087,12 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 14,
     fontWeight: '600',
+  },
+  emptyText: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontStyle: 'italic',
+    marginTop: 20,
   },
   detailsOverlay: {
     flex: 1,

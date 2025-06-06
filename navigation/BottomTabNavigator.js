@@ -1,4 +1,4 @@
-// Updated BottomTabNavigator.js - Remove redundant SafeAreaView
+// Updated BottomTabNavigator.js - Add CalendarScreen
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -9,8 +9,9 @@ import HomeScreen from "../screens/HomeScreen";
 import ChatsScreen from "../screens/ChatsScreen";
 import ChannelsScreen from "../screens/ChannelsScreen";
 import GalleryScreen from "../screens/GalleryScreen";
-import ProfileScreen from "../screens/ProfileScreen"; // Import the new ProfileScreen
+import ProfileScreen from "../screens/ProfileScreen";
 import ClassScreen from "../screens/ClassScreen";
+import CalendarScreen from "../screens/CalendarScreen"; // Add this import
 import ModerationScreen from "../screens/ModerationScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
 import NotFoundScreen from "../screens/NotFoundScreen";
@@ -89,7 +90,7 @@ function TabBarIcon(props) {
   return <Ionicons size={26} style={{ marginBottom: -3 }} {...props} />;
 }
 
-// Home navigator stack
+// Home navigator stack - Add CalendarScreen here
 const HomeStack = createStackNavigator();
 function HomeNavigator() {
   return (
@@ -125,6 +126,13 @@ function HomeNavigator() {
         name="GalleryScreen" 
         component={GalleryScreen}
         options={{ headerTitle: "Gallery" }}
+      />
+      <HomeStack.Screen
+        name="CalendarScreen" 
+        component={CalendarScreen}
+        options={{ 
+          headerShown: false // We use custom header in CalendarScreen
+        }}
       />
       <HomeStack.Screen
         name="ClassScreen" 
@@ -185,7 +193,7 @@ function ProfileNavigator() {
       <ProfileStack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
-        options={{ headerTitle: "Profile" }}
+        options={{ headerShown: false }} // ProfileScreen has custom header too
       />
     </ProfileStack.Navigator>
   );
