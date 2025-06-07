@@ -142,6 +142,7 @@ export default function HomeScreen({ navigation }) {
         onPress={() => {
           if (feature.title === "Chats") navigation.navigate("ChannelsScreen");
           if (feature.title === "Gallery") navigation.navigate("GalleryScreen");
+          if (feature.title === "Calendar") navigation.navigate("CalendarScreen");
           if (feature.title === "Dorm Classes") navigation.navigate("ClassScreen");
           if (feature.title === "Profile") navigation.navigate('ProfileScreen');
           if (feature.title === "Moderation") navigation.navigate("ModerationScreen");
