@@ -72,16 +72,6 @@ export default function BottomTabNavigator() {
           ),
         }}
       />
-      <BottomTab.Screen
-        name="Settings"
-        component={SettingsNavigator}
-        options={{
-          headerShown: false,
-          tabBarIcon: ({ color }) => (
-            <TabBarIcon name="settings" color={color} />
-          ),
-        }}
-      />
     </BottomTab.Navigator>
   );
 }
@@ -144,6 +134,11 @@ function HomeNavigator() {
         component={ModerationScreen}
         options={{ headerTitle: "Moderation" }}
       />
+      <HomeStack.Screen
+        name="ProfileScreen" 
+        component={ProfileScreen}
+        options={{ headerTitle: "Profile" }}
+      />
     </HomeStack.Navigator>
   );
 }
@@ -193,35 +188,8 @@ function ProfileNavigator() {
       <ProfileStack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
-        options={{ headerShown: false }} // ProfileScreen has custom header too
+        options={{ headerTitle: "Profile" }} // ProfileScreen has custom header too
       />
     </ProfileStack.Navigator>
-  );
-}
-
-// Settings navigator stack (placeholder)
-const SettingsStack = createStackNavigator();
-function SettingsNavigator() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? 'dark' : 'light';
-
-  return (
-    <SettingsStack.Navigator
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: Colors.primary,
-        },
-        headerTintColor: "#fff",
-        headerTitleStyle: {
-          fontWeight: "bold",
-        },
-      }}
-    >
-      <SettingsStack.Screen
-        name="SettingsScreen"
-        component={TabTwoScreen}
-        options={{ headerTitle: "Settings" }}
-      />
-    </SettingsStack.Navigator>
   );
 }
