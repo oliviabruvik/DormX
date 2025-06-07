@@ -129,7 +129,7 @@ export default function HomeScreen({ navigation }) {
     { id: 2, title: "Gallery", Icon: GalleryIcon },
     { id: 3, title: "Calendar", Icon: CalendarIcon },
     { id: 4, title: "Dorm Classes", Icon: ClassesIcon },
-    { id: 5, title: "Profile", Icon: ProfileIcon },
+    { id: 5, title: "Members", Icon: ProfileIcon },
     ...(isRA ? [{ id: 6, title: "Moderation", Icon: ModerationIcon }] : []),
   ];
 
@@ -144,7 +144,7 @@ export default function HomeScreen({ navigation }) {
           if (feature.title === "Gallery") navigation.navigate("GalleryScreen");
           if (feature.title === "Calendar") navigation.navigate("CalendarScreen");
           if (feature.title === "Dorm Classes") navigation.navigate("ClassScreen");
-          if (feature.title === "Profile") navigation.navigate('ProfileScreen');
+          if (feature.title === "Members") navigation.navigate('MembersScreen');
           if (feature.title === "Moderation") navigation.navigate("ModerationScreen");
         }}
       />

@@ -13,7 +13,7 @@ import {
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../context/AuthContext'; // Import useAuth hook instead
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import Colors from '../constants/Colors';
 
@@ -85,68 +85,6 @@ export default function ProfileScreen() {
     setNewProfileImage(null);
   };
 
-  // Image picker
-  const pickImage = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Cannot upload an image without granting photo library access');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaType: ImagePicker.MediaType.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.7,
-        base64: false,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        setNewProfileImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
-    }
-  };
-
-    // Upload image to Supabase storage
-  const uploadProfileImage = async (imageUri) => {
-    if (!imageUri || !user?.id) return null;
-
-    try {
-      const fileExt = imageUri.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `profile-images/${fileName}`;
-
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, blob, {
-          contentType: `image/${fileExt}`,
-          upsert: false
-        });
-
-      if (error) {
-        console.error('Error uploading image:', error);
-        return null;
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
-    } catch (error) {
-      console.error('Error in uploadProfileImage:', error);
-      return null;
-    }
-  };
-
   const saveChanges = async () => {
     if (!editName.trim()) {
       Alert.alert('Error', 'Please enter your name');
@@ -154,16 +92,6 @@ export default function ProfileScreen() {
     }
 
     try {
-      let avatarUrl = displayProfile?.avatar_url;
-
-      // Upload new image if selected
-      if (newProfileImage) {
-        const uploadedUrl = await uploadProfileImage(newProfileImage);
-        if (uploadedUrl) {
-          avatarUrl = uploadedUrl;
-        }
-      }
-
       const updateData = {
         name: editName.trim(),
         bio: editBio.trim(),
@@ -171,7 +99,7 @@ export default function ProfileScreen() {
         room_number: editRoomNumber.trim(),
         year_in_school: editYearInSchool.trim(),
         major: editMajor.trim(),
-        avatar_url: avatarUrl,
+        // avatar_url: avatarUrl,
         updated_at: new Date().toISOString(),
       };
 
@@ -258,29 +186,15 @@ export default function ProfileScreen() {
 
   // Helper function to render avatar
   const renderAvatar = () => {
-    const imageSource = newProfileImage || displayProfile.avatar_url;
-
-    if (imageSource) {
-      return (
-        <Image
-          source={{ uri: imageSource }}
-          style={styles.profilePic}
-          onError={() => {
-            console.log('Failed to load profile avatar');
-          }}
-        />
-      );
-    } else {
-      const initials = displayProfile.name ? 
-        displayProfile.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase() : 
-        user.email?.charAt(0).toUpperCase() || 'U';
-      
-      return (
-        <View style={[styles.profilePic, styles.avatarPlaceholder]}>
-          <Text style={styles.avatarText}>{initials}</Text>
-        </View>
-      );
-    }
+    const initials = displayProfile.name ? 
+      displayProfile.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase() : 
+      user.email?.charAt(0).toUpperCase() || 'U';
+    
+    return (
+      <View style={[styles.profilePic, styles.avatarPlaceholder]}>
+        <Text style={styles.avatarText}>{initials}</Text>
+      </View>
+    );
   };
 
   // Format date helper
@@ -339,12 +253,7 @@ export default function ProfileScreen() {
       >
         {/* Profile Header */}
         <View style={[styles.profileHeader, { backgroundColor: Colors[theme].cardBackground }]}>
-          <TouchableOpacity 
-              style={styles.avatarContainer}
-              onPress={isEditing ? pickImage : undefined}
-            >
-              {renderAvatar()}
-          </TouchableOpacity>
+          {renderAvatar()}
 
           {isEditing ? (
               <View style={styles.nameEditContainer}>

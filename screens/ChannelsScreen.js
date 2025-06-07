@@ -284,7 +284,7 @@ export default function ChannelsScreen({ navigation }) {
             style={[styles.infoButton, { backgroundColor: Colors[theme].text + '20' }]}
             onPress={() => setShowNormsModal(true)}
           >
-            <Text style={[styles.infoButtonText, { color: Colors[theme].text }]}>ℹ️</Text>
+            <Text style={[styles.infoButtonText, { color: Colors[theme].text }]}>Norms</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.plusButton, { backgroundColor: Colors.primary }]}
@@ -587,7 +587,7 @@ export default function ChannelsScreen({ navigation }) {
 
               {/* Community Norms Agreement */}
               <View style={[styles.formGroup, styles.normsAgreement]}>
-                <View style={styles.normsHeader}>
+                {/* <View style={styles.normsHeader}> */}
                   <Text style={[styles.formLabel, { color: Colors[theme].text, marginBottom: 8 }]}>
                     Community Norms Agreement *
                   </Text>
@@ -599,7 +599,7 @@ export default function ChannelsScreen({ navigation }) {
                       View Norms
                     </Text>
                   </TouchableOpacity>
-                </View>
+                {/* </View> */}
                 
                 <TouchableOpacity 
                   style={styles.agreementRow}
@@ -789,15 +789,14 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   infoButton: {
-    width: 28,
+    width: 64,
     height: 28,
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 8,
   },
   infoButtonText: {
-    fontSize: 14,
+    fontSize: 12,
   },
   plusButton: {
     width: 32,
@@ -878,10 +877,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   viewNormsButton: {
+    alignSelf: 'flex-start',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    paddingVertical: 8,
+    borderRadius: 8,
     backgroundColor: 'rgba(123, 90, 255, 0.1)',
+    marginBottom: 16,
   },
   viewNormsText: {
     fontSize: 12,

@@ -14,7 +14,7 @@ import ClassScreen from "../screens/ClassScreen";
 import CalendarScreen from "../screens/CalendarScreen"; // Add this import
 import ModerationScreen from "../screens/ModerationScreen";
 import TabTwoScreen from "../screens/TabTwoScreen";
-import NotFoundScreen from "../screens/NotFoundScreen";
+import MembersScreen from "../screens/MembersScreen";
 
 const BottomTab = createBottomTabNavigator();
 
@@ -138,6 +138,11 @@ function HomeNavigator() {
         name="ProfileScreen" 
         component={ProfileScreen}
         options={{ headerTitle: "Profile" }}
+      />
+      <HomeStack.Screen
+        name="MembersScreen" 
+        component={MembersScreen}
+        options={{ headerTitle: "Members" }}
       />
     </HomeStack.Navigator>
   );

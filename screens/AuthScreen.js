@@ -12,7 +12,6 @@ import {
   ScrollView,
   Modal,
   TouchableOpacity,
-  Image,
   Switch
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -95,72 +94,6 @@ export default function AuthScreen() {
     }
   };
 
-  const pickImage = async () => {
-    try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== 'granted') {
-        Alert.alert('Permission Required', 'Cannot upload an image without granting photo library access');
-        return;
-      }
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaType: ImagePicker.MediaType.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.7,
-        base64: false,
-      });
-
-      if (!result.canceled && result.assets[0]) {
-        setProfileImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
-    }
-  }
-
-  const uploadProfileImage = async (imageUri, userId) => {
-    if (!imageUri || !userId) {
-      return null;
-    }
-
-    try {
-      // Create a unique filename
-      const fileExt = imageUri.split('.').pop();
-      const fileName = `${userId}-${Date.now()}.${fileExt}`;
-      const filePath = `profile-images/${fileName}`;
-
-      // Convert image to blob
-      const response = await fetch(imageUri);
-      const blob = await response.blob();
-
-      // Upload to Supabase storage
-      const { data, error } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, blob, {
-          contentType: `image/${fileExt}`,
-          upsert: false
-        });
-
-      if (error) {
-        console.error('Error uploading image:', error);
-        return null;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
-    } catch (error) {
-      console.error('Error in uploadProfileImage:', error);
-      return null;
-    }
-  };
-
  const handleCompleteOnboarding = async () => {
     if (!displayName.trim()) {
       Alert.alert('Error', 'Please enter a display name');
@@ -175,17 +108,10 @@ export default function AuthScreen() {
     setOnboardingLoading(true);
 
     try {
-      let profileImageUrl = null;
-
-      if (profileImage) {
-        profileImageUrl = await uploadProfileImage(profileImage, user.id);
-      }
-
       const onboardingData = {
         displayName,
         bio,
         email,
-        profileImageUrl,
         isRA,
         dormBuilding,
         roomNumber
@@ -291,21 +217,6 @@ export default function AuthScreen() {
           </View>
 
           <ScrollView style={styles.onboardingForm} showsVerticalScrollIndicator={false}>
-            {/* Profile Image */}
-            <View style={styles.imageSection}>
-              <Text style={styles.sectionTitle}>Profile Picture</Text>
-              <TouchableOpacity style={styles.imagePickerContainer} onPress={pickImage}>
-                {profileImage ? (
-                  <Image source={{ uri: profileImage }} style={styles.profileImage} />
-                ) : (
-                  <View style={styles.imagePlaceholder}>
-                    <Text style={styles.imagePlaceholderText}>📷</Text>
-                    <Text style={styles.imagePickerText}>Tap to add photo</Text>
-                  </View>
-                )}
-              </TouchableOpacity>
-            </View>
-
             {/* Display Name */}
             <View style={styles.onboardingInputContainer}>
               <Text style={styles.onboardingInputLabel}>Display Name *</Text>

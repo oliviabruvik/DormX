@@ -15,12 +15,15 @@ export default function ChatsScreen({ navigation, route}) {
 
   const { channelName = 'General' } = route.params || {};
 
-  // Sample chat data (you would replace this with real data)
   const [chats, setChats] = useState([]);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
   const [editingMessage, setEditingMessage] = useState(null);
   const [editText, setEditText] = useState('');
+
+  // Profile modal states
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedUserProfile, setSelectedUserProfile] = useState(null);
 
   const loadChats = async() => {
     try {
@@ -80,6 +83,47 @@ export default function ChatsScreen({ navigation, route}) {
       Alert.alert('Error', 'Failed to load chats');
     }
   }
+
+  const viewProfile = async (userId) => {
+    if (userId === user.id) {
+      // Don't show profile modal for current user
+      return;
+    }
+
+    try {
+      const { data: profileData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        console.error('Error loading user profile:', error);
+        Alert.alert('Error', 'Failed to load user profile');
+        return;
+      }
+
+      setSelectedUserProfile(profileData);
+      setShowProfileModal(true);
+    } catch (error) {
+      console.error('Unexpected error loading profile:', error);
+      Alert.alert('Error', 'Failed to load user profile');
+    }
+  };
+
+  const getAvatarText = (profile) => {
+    if (!profile) return 'U';
+    if (profile.name) {
+      return profile.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase();
+    }
+    return 'U';
+  };
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not available';
+    return new Date(dateString).toLocaleDateString();
+  };
 
   // Function to add a new message
   const addMessage = async (messageText) => {
@@ -247,29 +291,110 @@ export default function ChatsScreen({ navigation, route}) {
     setEditText('');
   }
 
+  // Profile detail modal component
+  const ProfileDetailModal = ({ profile, onClose }) => (
+    <Modal
+      visible={showProfileModal}
+      transparent={true}
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.profileModalContent, { backgroundColor: Colors[theme].cardBackground }]}>
+          <View style={styles.profileModalHeader}>
+            <Text style={[styles.profileModalTitle, { color: Colors[theme].text }]}>
+              Profile Details
+            </Text>
+            <TouchableOpacity onPress={onClose} style={styles.profileCloseButton}>
+              <Text style={styles.profileCloseButtonText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.profileModalBody}>
+
+            {/* Name and basic info */}
+            <Text style={[styles.profileModalName, { color: Colors[theme].text }]}>
+              {profile.name || 'No name set'}
+            </Text>
+            
+            {profile.is_ra && (
+              <View style={styles.profileRaBadge}>
+                <Text style={styles.profileRaBadgeText}>RA</Text>
+              </View>
+            )}
+
+            {profile.bio && (
+              <Text style={[styles.profileModalBio, { color: Colors[theme].text }]}>
+                {profile.bio}
+              </Text>
+            )}
+
+            {/* Details */}
+            <View style={styles.profileModalDetails}>
+              {profile.dorm_name && (
+                <View style={styles.profileDetailRow}>
+                  <Text style={[styles.profileDetailLabel, { color: Colors[theme].text }]}>Dorm:</Text>
+                  <Text style={[styles.profileDetailValue, { color: Colors[theme].text }]}>
+                    {profile.dorm_name} {profile.room_number && `#${profile.room_number}`}
+                  </Text>
+                </View>
+              )}
+              
+              {profile.year_in_school && (
+                <View style={styles.profileDetailRow}>
+                  <Text style={[styles.profileDetailLabel, { color: Colors[theme].text }]}>Year:</Text>
+                  <Text style={[styles.profileDetailValue, { color: Colors[theme].text }]}>
+                    {profile.year_in_school}
+                  </Text>
+                </View>
+              )}
+              
+              {profile.major && (
+                <View style={styles.profileDetailRow}>
+                  <Text style={[styles.profileDetailLabel, { color: Colors[theme].text }]}>Major:</Text>
+                  <Text style={[styles.profileDetailValue, { color: Colors[theme].text }]}>
+                    {profile.major}
+                  </Text>
+                </View>
+              )}
+
+              <View style={styles.profileDetailRow}>
+                <Text style={[styles.profileDetailLabel, { color: Colors[theme].text }]}>Member Since:</Text>
+                <Text style={[styles.profileDetailValue, { color: Colors[theme].text }]}>
+                  {formatDate(profile.created_at)}
+                </Text>
+              </View>
+            </View>
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+
+
     // Helper function to render avatar
   const renderAvatar = (chat) => {
     const profileData = chat.profiles || {};
-    const avatarUrl = profileData.avatar_url;
+    // const avatarUrl = profileData.avatar_url;
     const userName = profileData.name || chat.user_name || 'Unknown';
     
-    if (avatarUrl) {
-      return (
-        <Image 
-          source={{ uri: avatarUrl }} 
-          style={styles.avatarImage}
-          onError={() => {
-            console.log('Failed to load avatar image for:', userName);
-          }}
-        />
-      );
-    } else {
+    // if (avatarUrl) {
+    //   return (
+    //     <Image 
+    //       source={{ uri: avatarUrl }} 
+    //       style={styles.avatarImage}
+    //       onError={() => {
+    //         console.log('Failed to load avatar image for:', userName);
+    //       }}
+    //     />
+    //   );
+    // } else {
       return (
         <View style={styles.chatAvatar}>
           <Text style={styles.avatarText}>{userName.charAt(0).toUpperCase()}</Text>
         </View>
       );
-    }
+    // }
   };
 
   // Helper function to get display name
@@ -455,10 +580,12 @@ export default function ChatsScreen({ navigation, route}) {
             <View style={styles.avatarContainer}>{renderAvatar(chat)}</View>
             <View style={[styles.chatContent, { backgroundColor: 'transparent' }]}>
               <View style={[styles.chatHeader, { backgroundColor: 'transparent' }]}>
+                <TouchableOpacity onPress={() => viewProfile(chat.user_id)}>
                 <Text style={styles.chatName}
                             numberOfLines={1}
                             ellipsizeMode="tail">
                             {getDisplayName(chat)}</Text>
+                </TouchableOpacity>
                 <View style={styles.headerRight}>
                   <Text style={styles.chatTime}>
                     {chat.created_at ? new Date(chat.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Unknown time'} 
@@ -532,6 +659,17 @@ export default function ChatsScreen({ navigation, route}) {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Profile Detail Modal */}
+      {selectedUserProfile && (
+        <ProfileDetailModal 
+          profile={selectedUserProfile} 
+          onClose={() => {
+            setShowProfileModal(false);
+            setSelectedUserProfile(null);
+          }} 
+        />
+      )}
 
       <TextInputComponent />
     </KeyboardAvoidingView>
@@ -668,5 +806,107 @@ const styles = StyleSheet.create({
   flagIcon: {
     margin: 0,
     marginLeft: 4,
+  },
+    // Profile Modal Styles
+  profileModalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  profileModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  profileModalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  profileCloseButton: {
+    padding: 8,
+  },
+  profileCloseButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  profileModalBody: {
+    padding: 20,
+  },
+  profileModalAvatarContainer: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  profileModalAvatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarPlaceholder: {
+    backgroundColor: Colors.primary,
+  },
+  profileModalAvatarText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  profileModalName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  profileRaBadge: {
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    alignSelf: 'center',
+    marginBottom: 12,
+  },
+  profileRaBadgeText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  profileModalBio: {
+    fontSize: 16,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginBottom: 20,
+    opacity: 0.8,
+  },
+  profileModalDetails: {
+    marginTop: 8,
+  },
+  profileDetailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
+  },
+  profileDetailLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    flex: 1,
+  },
+  profileDetailValue: {
+    fontSize: 16,
+    flex: 2,
+    textAlign: 'right',
   },
 });
